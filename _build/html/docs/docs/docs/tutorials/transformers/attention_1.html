@@ -1,0 +1,580 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self Attention - Basics &mdash; deep learning .1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=69a67b7f"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link href="../../../../../_static/style.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            deep learning
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">GNNs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../tutorials/gnns/gcn.html">Graph Convolutional Networks</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Transformers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../tutorials/transformers/attention_1.html">Self Attention - Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../tutorials/transformers/attention_2.html">Self Attention - Another implementation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">deep learning</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Self Attention - Basics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/docs/docs/docs/tutorials/transformers/attention_1.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Self-Attention---Basics">
+<h1>Self Attention - Basics<a class="headerlink" href="#Self-Attention---Basics" title="Link to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+</pre></div>
+</div>
+</div>
+<p>This is how attetion is described in the Attention is All You Need paper.</p>
+<p>“An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors. The output is computed as a weighted sum of the values, where the weight assigned to each value is computed by a compatibility function of the query with the corresponding key.”</p>
+<p><span class="math notranslate nohighlight">\(Attention(Q,K,V) = softmax( \frac{QK^{T}} {\sqrt{d_{k}}} )V\)</span></p>
+<p>Let’s consider a single sequence of three tokens. This sequence can represent a senetence. The three tokens are 1,2 and 3.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sequence</span> <span class="o">=</span>  <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sequence</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([[1, 2, 3]])
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<p>let’s assume that the embedding vectors of 1,2 and 3 are as follows.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.0720</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5001</span><span class="p">],</span> <span class="mi">2</span><span class="p">:</span>  <span class="p">[</span><span class="o">-</span><span class="mf">0.0020</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">],</span> <span class="mi">3</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0020</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">]}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embedded_tokens</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.0720</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5001</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0020</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0020</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">]</span> <span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embedded_tokens</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([[-1.0720, -0.5001],
+        [-0.0020, -0.4311],
+        [-0.0020, -0.4311]])
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<p>As the next step, let’s create the Q,K,V matrices. This is done by transforming our embedding matrix using three weight vectors. WQ, WK and WV.</p>
+<p>let’s cosinder the following WQ, WK and WV matrices</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">WQ</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.0271</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3840</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mf">0.3940</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.6610</span><span class="p">]])</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">WK</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.4109</span><span class="p">,</span>  <span class="mf">0.5777</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mf">0.1162</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1661</span><span class="p">]])</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">WV</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.2045</span><span class="p">,</span>  <span class="mf">0.1210</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mf">0.1712</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4462</span><span class="p">]])</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<p>Now, let’s transform our embedded tokens using the transformation matrices WQ, WK and WV.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Q</span> <span class="o">=</span> <span class="n">embedded_tokens</span> <span class="o">@</span> <span class="n">WQ</span>
+<span class="n">K</span> <span class="o">=</span> <span class="n">embedded_tokens</span> <span class="o">@</span> <span class="n">WK</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">embedded_tokens</span> <span class="o">@</span> <span class="n">WV</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Q</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([[0.2261, 0.7422],
+        [0.1699, 0.2857],
+        [0.1699, 0.2857]], grad_fn=&lt;MmBackward0&gt;)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">K</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([[ 0.4986, -0.5362],
+        [ 0.0509,  0.0705],
+        [ 0.0509,  0.0705]], grad_fn=&lt;MmBackward0&gt;)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">V</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([[0.3048, 0.0934],
+        [0.0742, 0.1921],
+        [0.0742, 0.1921]], grad_fn=&lt;MmBackward0&gt;)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d_k</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}Q = \begin{bmatrix} Q_{1,1} &amp; Q_{1,2} \\ Q_{2,1} &amp; Q_{2,2} \\ Q_{3,1} &amp; Q_{3,2} \end{bmatrix}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}Q = \begin{bmatrix} \vec{Q_{1}} \\ \vec{Q_{2}} \end{bmatrix}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}K = \begin{bmatrix} K_{1,1} &amp; K_{1,2} \\ K_{2,1} &amp; K_{2,2} \\ K_{3,1} &amp; K_{3,2} \end{bmatrix}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}K^{T} = \begin{bmatrix} \vec{K_{1}} \\ \vec{K_{2}} \end{bmatrix}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}K^{T} = \begin{bmatrix} K_{1,1} &amp; K_{2,1} \\ K_{1,2} &amp; K_{2,2} \\ K_{1,3} &amp; K_{2,3} \end{bmatrix}\end{split}\]</div>
+<!-- $$ K = \begin{bmatrix} \vec{K_{1}} \\ \vec{K_{2}} \\ \vec{K_{3}} \end{bmatrix}$$ --><div class="math notranslate nohighlight">
+\[\begin{split}V = \begin{bmatrix} V_{1,1} &amp; V_{1,2} \\ V_{2,1} &amp; V_{2,2}  \\ V_{3,1} &amp; V_{3,2} \end{bmatrix}\end{split}\]</div>
+<p>Attention logits are given by <span class="math notranslate nohighlight">\(QK^{T}\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split} QK^{T} = \begin{bmatrix} Q_{1,1}\times K_{1,1} + Q_{1,2}\times K_{1,2} &amp;
+Q_{1,1}\times K_{2,1} + Q_{1,2}\times K_{2,2} &amp;
+Q_{1,1}\times K_{3,1} + Q_{1,2}\times K_{3,2} \\
+Q_{2,1}\times K_{1,1} + Q_{2,2}\times K_{1,2} &amp;
+Q_{2,1}\times K_{2,1} + Q_{2,2}\times K_{2,2} &amp;
+Q_{2,1}\times K_{3,1} + Q_{2,2}\times K_{3,2} \\
+Q_{3,1}\times K_{1,1} + Q_{3,2}\times K_{1,2} &amp;
+Q_{3,1}\times K_{2,1} + Q_{3,2}\times K_{2,2} &amp;
+Q_{3,1}\times K_{3,1} + Q_{3,2}\times K_{3,2} \end{bmatrix}\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split} QK^{T} = \begin{bmatrix} \vec{Q_{1}}\cdot \vec{K_{1}} &amp;
+\vec{Q_{1}}\cdot \vec{K_{2}} &amp;
+\vec{Q_{1}}\cdot \vec{K_{3}} \\
+\vec{Q_{2}}\cdot \vec{K_{1}} &amp;
+\vec{Q_{2}}\cdot \vec{K_{2}} &amp;
+\vec{Q_{2}}\cdot \vec{K_{3}} \\
+\vec{Q_{3}}\cdot \vec{K_{1}} &amp;
+\vec{Q_{3}}\cdot \vec{K_{2}} &amp;
+\vec{Q_{3}}\cdot \vec{K_{3}} \end{bmatrix}\end{split}\]</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attn_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">K</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="n">attn_logits</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([[-0.2853,  0.0638,  0.0638],
+        [-0.0685,  0.0288,  0.0288],
+        [-0.0685,  0.0288,  0.0288]], grad_fn=&lt;MmBackward0&gt;)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># torch.matmul(Q, K.transpose(-2, -1))</span>
+</pre></div>
+</div>
+</div>
+<p>what is <span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>? It is a representation of 1st sentence part. what is K1? It is another representation of 1st sentence part.</p>
+<p>Each row of the attention matrix (softmax(QKTQK T)) contains weights representing how much a query (e.g., a word) “pays attention” to all other keys (words) in the sequence.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split} QK^{T}/\sqrt(d_{k}) = \begin{bmatrix} \frac{\vec{Q_{1}}\cdot \vec{K_{1}}}{\sqrt(d_{k})} &amp;
+\frac{\vec{Q_{1}}\cdot \vec{K_{2}}}{ \sqrt(d_{k}) } &amp;
+\frac{\vec{Q_{1}}\cdot \vec{K_{3}}}{ \sqrt(d_{k}) } \\
+\frac{\vec{Q_{2}}\cdot \vec{K_{1}}}{ \sqrt(d_{k}) } &amp;
+\frac{\vec{Q_{2}}\cdot \vec{K_{2}}}{ \sqrt(d_{k}) } &amp;
+\frac{\vec{Q_{2}}\cdot \vec{K_{3}}}{ \sqrt(d_{k}) } \\
+\frac{\vec{Q_{3}}\cdot \vec{K_{1}}}{ \sqrt(d_{k}) } &amp;
+\frac{\vec{Q_{3}}\cdot \vec{K_{2}}}{ \sqrt(d_{k}) } &amp;
+\frac{\vec{Q_{3}}\cdot \vec{K_{3}}}{ \sqrt(d_{k}) } \end{bmatrix}\end{split}\]</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scaled_attention_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">K</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_k</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scaled_attention_logits</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([[-0.2017,  0.0451,  0.0451],
+        [-0.0484,  0.0204,  0.0204],
+        [-0.0484,  0.0204,  0.0204]], grad_fn=&lt;DivBackward0&gt;)
+</pre></div></div>
+</div>
+<div class="math notranslate nohighlight">
+\[\begin{split} softmax(QK^{T}/\sqrt(d_{k})) = \begin{bmatrix} \frac{exp({\frac{\vec{Q_{1}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) }{ exp({\frac{\vec{Q_{1}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{1}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{1}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}})} &amp;
+\frac{exp(\frac{\vec{Q_{1}}\cdot \vec{K_{2}}}{ \sqrt(d_{k}) })}{ exp({\frac{\vec{Q_{1}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{1}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{1}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}})  } &amp;
+\frac{exp(\frac{\vec{Q_{1}}\cdot \vec{K_{3}}}{ \sqrt(d_{k}) })}{ exp({\frac{\vec{Q_{1}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{1}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{1}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}}) } \\
+\frac{exp(\frac{\vec{Q_{2}}\cdot \vec{K_{1}}}{ \sqrt(d_{k}) })}{ exp({\frac{\vec{Q_{2}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{2}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{2}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}}) } &amp;
+\frac{exp(\frac{\vec{Q_{2}}\cdot \vec{K_{2}}}{ \sqrt(d_{k}) })}{ exp({\frac{\vec{Q_{2}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{2}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{2}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}}) } &amp;
+\frac{exp(\frac{\vec{Q_{2}}\cdot \vec{K_{3}}}{ \sqrt(d_{k}) })}{ exp({\frac{\vec{Q_{2}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{2}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{2}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}}) } \\
+\frac{exp(\frac{\vec{Q_{3}}\cdot \vec{K_{1}}}{ \sqrt(d_{k}) })}{  exp({\frac{\vec{Q_{3}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{3}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{3}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}}) } &amp;
+\frac{exp(\frac{\vec{Q_{3}}\cdot \vec{K_{2}}}{ \sqrt(d_{k}) })}{ exp({\frac{\vec{Q_{3}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{3}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{3}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}}) } &amp;
+\frac{exp(\frac{\vec{Q_{3}}\cdot \vec{K_{3}}}{ \sqrt(d_{k}) })}{ exp({\frac{\vec{Q_{3}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{3}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{3}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}})  } \end{bmatrix}\end{split}\]</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">scaled_attention_logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([[0.2809, 0.3595, 0.3595],
+        [0.3182, 0.3409, 0.3409],
+        [0.3182, 0.3409, 0.3409]], grad_fn=&lt;SoftmaxBackward0&gt;)
+</pre></div></div>
+</div>
+<p>you can see that values in each row add up to 1.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor(1., grad_fn=&lt;SumBackward0&gt;)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor(1., grad_fn=&lt;SumBackward0&gt;)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor(1., grad_fn=&lt;SumBackward0&gt;)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span> <span class="o">@</span> <span class="n">V</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([[0.1390, 0.1644],
+        [0.1476, 0.1607],
+        [0.1476, 0.1607]], grad_fn=&lt;MmBackward0&gt;)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<p>output values</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">attention_weights</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([[0.1390, 0.1644],
+        [0.1476, 0.1607],
+        [0.1476, 0.1607]], grad_fn=&lt;MmBackward0&gt;)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Gihan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

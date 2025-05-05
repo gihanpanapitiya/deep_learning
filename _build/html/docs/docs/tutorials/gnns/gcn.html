@@ -100,7 +100,8 @@
 </div>
 <p>Let’s build a graph convolutional neural network. I will use the definition of a GCN layer given in the torch_geometric dicumentation.</p>
 <p><span class="math notranslate nohighlight">\(x_{i}^{(k)} = \sum_{j \in N(i) \bigcup i} \frac{1}{\sqrt(deg(i))\cdot\sqrt(deg(j)) } \cdot (W^{T} \cdot x_{j}^{(k-1)})+b\)</span></p>
-<p>Here k is used to denote the graph convolution layer. This can be identified as a pass through the graph convolution operation or a single iteration of using the above equation on the current set of node (and/or edge) features.</p>
+<p><span class="math notranslate nohighlight">\(x\)</span> are node features. <span class="math notranslate nohighlight">\(N(i)\)</span> are the neighbors of node <span class="math notranslate nohighlight">\(i\)</span> <span class="math notranslate nohighlight">\(deg(i)\)</span> and <span class="math notranslate nohighlight">\(deg(j)\)</span> are the degrees of nodes <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span>. The degree refers to the number of edges attached to a given node. <span class="math notranslate nohighlight">\(W\)</span> is a matrix that transforms the node features. The elements of this matrix are trainable. <span class="math notranslate nohighlight">\(b\)</span> is a bias value.</p>
+<p>Here, k is used to denote the graph convolution layer. This can be identified as a single pass through the graph convolution operation. In other words, a single iteration of using the above equation on the current set of node (and/or edge) features.</p>
 <p>Let’s understand what happens here. In this equation, we update the the node features of node <span class="math notranslate nohighlight">\(i\)</span>. The subscript of the summation symbol indicates that we consider the neighbors of node <span class="math notranslate nohighlight">\(i\)</span> and node <span class="math notranslate nohighlight">\(i\)</span> itself. For a given neighbor <span class="math notranslate nohighlight">\(j\)</span>, we transform it’s node feature <span class="math notranslate nohighlight">\(x_{j}\)</span> using the weight matrix <span class="math notranslate nohighlight">\(W\)</span>. We divide this value by the product of the square root of the degrees of nodes <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span>.</p>
 <p>We do this operation for all the neighboring nodes of <span class="math notranslate nohighlight">\(i\)</span>.</p>
 <p>Then we collect all these transformed node features of the neighbhring nodes corresponding to node <span class="math notranslate nohighlight">\(i\)</span> and add them all together. Optionally, we can add a bias term <span class="math notranslate nohighlight">\(b\)</span> to this summation. This summation becomes the new node feature of node <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(x_{i}^{k}\)</span> at iteration <span class="math notranslate nohighlight">\(k\)</span>.</p>
@@ -125,61 +126,92 @@
 
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">):</span>
 
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1"># line 1</span>
 
-        <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">edge_index</span>
-        <span class="n">deg</span> <span class="o">=</span> <span class="n">degree</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">edge_index</span> <span class="c1"># line 2</span>
+        <span class="n">deg</span> <span class="o">=</span> <span class="n">degree</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="c1"># line 3</span>
 
-        <span class="n">deg_inv_sqrt</span> <span class="o">=</span> <span class="n">deg</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">deg_inv_sqrt</span> <span class="o">=</span> <span class="n">deg</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span> <span class="c1"># line 4</span>
 
         <span class="c1"># if the inverse square root is infinity, that value is set to zero.</span>
-        <span class="n">deg_inv_sqrt</span><span class="p">[</span><span class="n">deg_inv_sqrt</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="n">deg_inv_sqrt</span><span class="p">[</span><span class="n">row</span><span class="p">]</span> <span class="o">*</span> <span class="n">deg_inv_sqrt</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span>
+        <span class="n">deg_inv_sqrt</span><span class="p">[</span><span class="n">deg_inv_sqrt</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># line 5</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">deg_inv_sqrt</span><span class="p">[</span><span class="n">source</span><span class="p">]</span> <span class="o">*</span> <span class="n">deg_inv_sqrt</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="c1"># line 6</span>
+        <span class="c1"># print(norm)</span>
 
         <span class="c1"># propagate is a method implemented in MessagePassing. This is where</span>
         <span class="c1"># massage passing takes place. you have to send the edge indices and the node features.</span>
         <span class="c1"># additionally, you can send other optional values to create your message from node j to node i.</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">edge_index</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span> <span class="c1"># line 7</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="c1"># line 8</span>
 
         <span class="k">return</span> <span class="n">out</span>
 
     <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_j</span><span class="p">,</span> <span class="n">norm</span><span class="p">):</span>
         <span class="c1"># this is wehere we define the message from node j to node i.</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">x_j</span><span class="p">)</span>
+        <span class="c1"># print(x_j)</span>
         <span class="k">return</span> <span class="n">norm</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_j</span>
 </pre></div>
 </div>
 </div>
+<section id="Let's-understand-what-happens-at-each-line-of-the-forward-method.">
+<h2>Let’s understand what happens at each line of the forward method.<a class="headerlink" href="#Let's-understand-what-happens-at-each-line-of-the-forward-method." title="Link to this heading"></a></h2>
+<p>line 1: We transform the input features using the W matrix and a bias term. This corresponds to the <span class="math notranslate nohighlight">\((W^{T} \cdot x_{j}^{(k-1)})+b\)</span> part in our equation for <span class="math notranslate nohighlight">\(x_{i}^{(k)}\)</span></p>
+<p>line 2: We seperate the two lists of connected nodes to two lists, <span class="math notranslate nohighlight">\(row\)</span> and <span class="math notranslate nohighlight">\(col\)</span>.</p>
+<p>line 3: we calculate the degree of each node. We use pytoorch_geometrics, <a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/2.4.0/_modules/torch_geometric/utils/degree.html">degree function</a>. The first argument to the degree function is the vector of edge indices. The second argument is the number of nodes in the graph.</p>
+<p>line 4: Take the square root of the degree values.</p>
+<p>line 5: if the inverse square root is infinity, that value is set to zero.</p>
+<p>line 6: This is where we calculate the factor <span class="math notranslate nohighlight">\(\frac{1}{\sqrt(deg(i))\cdot\sqrt(deg(j)) }\)</span>.</p>
+<p>line 7: This is the confusing step in building GNNs using pytorch geometric. <code class="docutils literal notranslate"><span class="pre">`propagate</span></code> &lt;<a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/2.4.0/_modules/torch_geometric/nn/conv/message_passing.html#MessagePassing.propagate">https://pytorch-geometric.readthedocs.io/en/2.4.0/_modules/torch_geometric/nn/conv/message_passing.html#MessagePassing.propagate</a>&gt;`__ method is where the MessagePassing happens. You have to send the edge_index and other additional values that are needed to contstruct the message. How to construct the message is defined in the <code class="docutils literal notranslate"><span class="pre">message</span></code> function. In our case, the message that is passed to the target node
+is constructed by multiplying the source node’s features with the nomalization factor. Once the messages are constructed at each source node, they are aggregated. In our case, the aggreegation is the summing of all the neighbouring source node features. This aggregation operation also takes place inside the <code class="docutils literal notranslate"><span class="pre">propagate</span></code> method.</p>
+<p>Note that in our case, the the neighbouring nodes of a given target node consists of the target node itself. This is becasue we consider self loops. Self loops are the edges that connect a node to itself.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">flow</span></code> parameter in the <code class="docutils literal notranslate"><span class="pre">MessagePassing</span></code> class determines the from where to where the messages are sent. By default, the value of <code class="docutils literal notranslate"><span class="pre">flow</span></code> is “source_to_target”. If the edge index is a tensor of the shape, 2 <span class="math notranslate nohighlight">\(\times\)</span> ‘number of messages’ (as in our case). The messages are sent from nodes given in the first list of the <code class="docutils literal notranslate"><span class="pre">edge_index</span></code> tensor to the second index of the <code class="docutils literal notranslate"><span class="pre">edge_index</span></code> tensor. That is, the source nodes are in the first list of the edge_index tensor. The target nodes are
+in the second list of of the edge_index tensor.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
 <section id="Define-the-node-and-edge-features">
-<h2>Define the node and edge features<a class="headerlink" href="#Define-the-node-and-edge-features" title="Link to this heading"></a></h2>
+<h3>Define the node and edge features<a class="headerlink" href="#Define-the-node-and-edge-features" title="Link to this heading"></a></h3>
+<p>These are our node features. Node 0 is featurized with <span class="math notranslate nohighlight">\([0, 1]\)</span>. Node 1 is featurized with <span class="math notranslate nohighlight">\([2, 3]\)</span>. Node 2 is featurized with <span class="math notranslate nohighlight">\([4, 5]\)</span>. Node 3 is featurized with <span class="math notranslate nohighlight">\([6, 7]\)</span>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># node_feats = torch.arange(8, dtype=torch.float32).view(1, 4, 2)</span>
-<span class="n">node_feats</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">node_feats</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
          <span class="p">[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">],</span>
          <span class="p">[</span><span class="mf">4.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">],</span>
          <span class="p">[</span><span class="mf">6.</span><span class="p">,</span> <span class="mf">7.</span><span class="p">]]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-<span class="n">adj_matrix</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+</pre></div>
+</div>
+</div>
+<p>The following matrix indicates which two nodes are connected. That is if node <span class="math notranslate nohighlight">\(i, j\)</span> are connected with an edge the <span class="math notranslate nohighlight">\(i, j\)</span> element of the following matrix is 1.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adj_matrix</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                             <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
                             <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
                             <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]])</span>
 </pre></div>
 </div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">weight</span> <span class="pre">data</span></code> is the <span class="math notranslate nohighlight">\(W\)</span> matrix that transforms our node features.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weight_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
 </pre></div>
 </div>
 </div>
+<p>pytorch_geometric requires that adjacency matrix expressed as a two lists. <span class="math notranslate nohighlight">\(i^{th}\)</span> elements of the two lists are the node indices that are connected.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">edge_index</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">dense_to_sparse</span><span class="p">(</span><span class="n">adj_matrix</span><span class="p">)</span>
@@ -187,7 +219,7 @@
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">edge_index</span>
@@ -195,7 +227,7 @@
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -204,45 +236,84 @@ tensor([[0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3],
         [0, 1, 0, 1, 2, 3, 1, 2, 3, 1, 2, 3]])
 </pre></div></div>
 </div>
+<p>Let’s just see how the degree values are calcualted.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">edge_index</span> <span class="c1"># line 2</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([0, 1, 0, 1, 2, 3, 1, 2, 3, 1, 2, 3])
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">deg</span> <span class="o">=</span> <span class="n">degree</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># line 3</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">deg</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([2., 4., 3., 3.])
+</pre></div></div>
+</div>
+<p>Now, let’s create the convolution layer.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">conv</span> <span class="o">=</span> <span class="n">GCNConv</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">weight_data</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">output_node_features</span> <span class="o">=</span> <span class="n">conv</span><span class="p">(</span><span class="n">node_feats</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">conv</span><span class="p">(</span><span class="n">node_feats</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">output_node_features</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-tensor([0.5000, 0.3536, 0.3536, 0.2500, 0.2887, 0.2887, 0.2887, 0.3333, 0.3333,
-        0.2887, 0.3333, 0.3333])
-tensor([[[0., 1.],
-         [0., 1.],
-         [2., 3.],
-         [2., 3.],
-         [2., 3.],
-         [2., 3.],
-         [4., 5.],
-         [4., 5.],
-         [4., 5.],
-         [6., 7.],
-         [6., 7.],
-         [6., 7.]]], grad_fn=&lt;IndexSelectBackward0&gt;)
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -269,6 +340,15 @@ tensor([[[0.7071, 1.5607],
 </pre></div>
 </div>
 </div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
 </section>
 </section>
 
