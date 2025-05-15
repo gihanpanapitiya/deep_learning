@@ -5,7 +5,7 @@
    "id": "01a4a79a",
    "metadata": {},
    "source": [
-    "# Graph Convolutional Networks"
+    "# Graph Convolutional Networks (GCN)"
    ]
   },
   {
@@ -28,7 +28,7 @@
    "id": "1e8dbb55-4380-4a6a-9c08-e76eeada4f8a",
    "metadata": {},
    "source": [
-    "Let's build a graph convolutional neural network. I will use the definition of a GCN layer given in the torch_geometric dicumentation."
+    "Let's build a graph convolutional neural network. The equation to update node features in GCNs can be defined as below."
    ]
   },
   {

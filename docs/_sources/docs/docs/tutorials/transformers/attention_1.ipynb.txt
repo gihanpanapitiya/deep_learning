@@ -27,9 +27,11 @@
    "id": "93019565",
    "metadata": {},
    "source": [
-    "This is how attetion is described in the Attention is All You Need paper. <br>\n",
+    "This is how attetion is described in the [Attention is All You Need](https://arxiv.org/abs/1706.03762) paper. <br>\n",
     "\n",
-    "\"An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors. The output is computed as a weighted sum of the values, where the weight assigned to each value is computed by a compatibility function of the query with the corresponding key.\""
+    "\"An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors. The output is computed as a weighted sum of the values, where the weight assigned to each value is computed by a compatibility function of the query with the corresponding key.\"\n",
+    "\n",
+    "-- Attention Is All You Need, Vaswani et. al."
    ]
   },
   {
@@ -45,12 +47,12 @@
    "id": "fa789f0d",
    "metadata": {},
    "source": [
-    "Let's consider a single sequence of three tokens. This sequence can represent a senetence. The three tokens are 1,2 and 3."
+    "Let's suppose that we have a sentence of three words. For example 'sky is blue'. Let's  also assume that these three words are represented using three numbers, 1, 2 and 3. These are called tokens.  Therefore, our sequence of tokens is given by the following tensor. Tokenization is the process of breaking a sequence of characters into different parts. There are many tokenization methods. What I have done here is a very simple tokenization method for the sake of easliy explaining the concepts of the attention mechanism."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 2,
+   "execution_count": 28,
    "id": "cf8ce180",
    "metadata": {},
    "outputs": [],
@@ -60,7 +62,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": 29,
    "id": "98d136b9-b6db-42ad-96c2-6f84d126b63d",
    "metadata": {},
    "outputs": [
@@ -70,7 +72,7 @@
        "tensor([[1, 2, 3]])"
       ]
      },
-     "execution_count": 3,
+     "execution_count": 29,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -80,12 +82,20 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "e1674cc0-1063-489b-bdb6-d2f54f0439e2",
+   "cell_type": "markdown",
+   "id": "55ddbac1-815c-4c83-89cf-24acc5987ca5",
    "metadata": {},
-   "outputs": [],
-   "source": []
+   "source": [
+    "In this case, our `sequence length` is 3."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "21b6ca82-e4c7-427b-8404-3c07e0505499",
+   "metadata": {},
+   "source": [
+    "Tokenization alone is not enough to create a information-rich representation of a character sequence. We will have to come up with a vector representation for each token. These are called embeddings."
+   ]
   },
   {
    "cell_type": "markdown",
@@ -100,9 +110,29 @@
    "execution_count": 4,
    "id": "7dddf9ce-6d6e-49f6-b9ba-4f18469ede60",
    "metadata": {},
-   "outputs": [],
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{1: [-1.072, -0.5001], 2: [-0.002, -0.4311], 3: [-0.002, -0.4311]}"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
-    "embeddings = {1: [-1.0720, -0.5001], 2:  [-0.0020, -0.4311], 3: [-0.0020, -0.4311]}"
+    "embeddings = {1: [-1.0720, -0.5001], 2:  [-0.0020, -0.4311], 3: [-0.0020, -0.4311]}\n",
+    "embeddings"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7ad64433-e455-4d5f-b778-b65e16bcd062",
+   "metadata": {},
+   "source": [
+    "Therefore, our embedded tokens are,"
    ]
   },
   {
@@ -183,14 +213,6 @@
    "cell_type": "code",
    "execution_count": null,
    "id": "da77a2a9-af6c-4510-8b14-06938ce4a320",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "fc72689c-9db2-46cf-bafd-70b3856d9f00",
    "metadata": {},
    "outputs": [],
    "source": []
@@ -295,6 +317,14 @@
    ]
   },
   {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2487593c-350e-4822-b775-de9da1ae450d",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
    "cell_type": "markdown",
    "id": "120eb74c-7034-4854-93a1-37c56bcfabc3",
    "metadata": {},
@@ -376,6 +406,14 @@
   },
   {
    "cell_type": "markdown",
+   "id": "00c42922-0432-412b-93ac-184cc31ecfdb",
+   "metadata": {},
+   "source": [
+    "Equivalently,"
+   ]
+  },
+  {
+   "cell_type": "markdown",
    "id": "4ae4f5b9-a138-4438-b819-b25680a8f313",
    "metadata": {},
    "source": [
@@ -392,7 +430,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
+   "execution_count": 30,
    "id": "03f96b33-4adc-48c0-983f-c47f3a67ac9b",
    "metadata": {},
    "outputs": [
@@ -404,7 +442,7 @@
        "        [-0.0685,  0.0288,  0.0288]], grad_fn=<MmBackward0>)"
       ]
      },
-     "execution_count": 13,
+     "execution_count": 30,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -415,22 +453,20 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": 14,
-   "id": "e7462ff6-04bc-4a8e-8979-1904f8bd8f0f",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "# torch.matmul(Q, K.transpose(-2, -1))"
-   ]
-  },
-  {
    "cell_type": "markdown",
    "id": "6e367763-2d13-4ea8-b427-56b67c2b8d3c",
    "metadata": {},
    "source": [
-    "what is $\\vec{Q_{1}}$? It is a representation of 1st sentence part. <br>\n",
-    "what is K1? It is another representation of 1st sentence part. <br>"
+    "what is $\\vec{Q_{1}}$? It is a representation of the $1^{st}$ token. <br>\n",
+    "what is K1? It is another representation of the $1^{st}$ token. <br>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "98fc0918-a73d-4b51-b731-4b7c469b706d",
+   "metadata": {},
+   "source": [
+    "Each element in the `attn_logits` matrix is a measure of how similar two $\\vec{Q}$ and $\\vec{K}$ vectors are."
    ]
   },
   {
@@ -438,7 +474,23 @@
    "id": "1182962a-a37c-42b6-8ba5-660d07d1f658",
    "metadata": {},
    "source": [
-    "Each row of the attention matrix (softmax(QKTQK T)) contains weights representing how much a query (e.g., a word) \"pays attention\" to all other keys (words) in the sequence."
+    "Each row of the `attn_logits` matrix shows how similar a query to all the keys. For example, row 1 is (similarity between Q1 and K1, similarity between Q1 and K2, similarity between Q1 and K3)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "67822f3c-4f04-4475-b118-af876228d941",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fe25f7f6-abc5-4dee-8bec-089995d38f16",
+   "metadata": {},
+   "source": [
+    "The next step is scaling the `attention_logits` matrix with the scaling factor, $\\sqrt(d_{k}$.\n"
    ]
   },
   {
@@ -459,7 +511,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 15,
+   "execution_count": 31,
    "id": "28f7d892-414f-4d6a-b189-c380fb49c5ca",
    "metadata": {},
    "outputs": [],
@@ -469,7 +521,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 16,
+   "execution_count": 32,
    "id": "61cc140c-e29b-4449-9ffb-1eda8a23c0f5",
    "metadata": {},
    "outputs": [
@@ -481,13 +533,21 @@
        "        [-0.0484,  0.0204,  0.0204]], grad_fn=<DivBackward0>)"
       ]
      },
-     "execution_count": 16,
+     "execution_count": 32,
      "metadata": {},
      "output_type": "execute_result"
     }
    ],
    "source": [
     "scaled_attention_logits"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0b433e76-5f77-4695-a90f-031509b19c78",
+   "metadata": {},
+   "source": [
+    "Finally, we apply the softmax operation to each row. This normalizes the values of each row so that the sum of these values is 1."
    ]
   },
   {
@@ -508,7 +568,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 17,
+   "execution_count": 34,
    "id": "0fd5a91f-5c31-4661-8717-1cdd3e1671cc",
    "metadata": {},
    "outputs": [],
@@ -518,7 +578,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 18,
+   "execution_count": 35,
    "id": "61cb7e78-2659-4051-84c9-8c5423792360",
    "metadata": {},
    "outputs": [
@@ -530,7 +590,7 @@
        "        [0.3182, 0.3409, 0.3409]], grad_fn=<SoftmaxBackward0>)"
       ]
      },
-     "execution_count": 18,
+     "execution_count": 35,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -544,12 +604,12 @@
    "id": "63c54673-add7-4173-877f-c25dccc60ffa",
    "metadata": {},
    "source": [
-    "you can see that values in each row add up to 1."
+    "Note that values in each row add up to 1."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 19,
+   "execution_count": 36,
    "id": "fadaa733-3243-4fd9-96e1-2c9dd87b2e72",
    "metadata": {},
    "outputs": [
@@ -559,7 +619,7 @@
        "tensor(1., grad_fn=<SumBackward0>)"
       ]
      },
-     "execution_count": 19,
+     "execution_count": 36,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -570,7 +630,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 20,
+   "execution_count": 37,
    "id": "88e27a7d-731b-41a2-8131-0ba7d38e3dfe",
    "metadata": {},
    "outputs": [
@@ -580,7 +640,7 @@
        "tensor(1., grad_fn=<SumBackward0>)"
       ]
      },
-     "execution_count": 20,
+     "execution_count": 37,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -591,7 +651,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 21,
+   "execution_count": 38,
    "id": "541bcdd1-9ada-4c84-8f94-5047f7fac678",
    "metadata": {},
    "outputs": [
@@ -601,7 +661,7 @@
        "tensor(1., grad_fn=<SumBackward0>)"
       ]
      },
-     "execution_count": 21,
+     "execution_count": 38,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -609,6 +669,14 @@
    "source": [
     "attention_weights[2].sum()"
    ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "98a73461-0d80-47a4-a860-928377bf4800",
+   "metadata": {},
+   "outputs": [],
+   "source": []
   },
   {
    "cell_type": "code",

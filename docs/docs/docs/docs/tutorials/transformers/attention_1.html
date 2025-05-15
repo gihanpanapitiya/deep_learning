@@ -97,10 +97,11 @@
 </pre></div>
 </div>
 </div>
-<p>This is how attetion is described in the Attention is All You Need paper.</p>
+<p>This is how attetion is described in the <a class="reference external" href="https://arxiv.org/abs/1706.03762">Attention is All You Need</a> paper.</p>
 <p>“An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors. The output is computed as a weighted sum of the values, where the weight assigned to each value is computed by a compatibility function of the query with the corresponding key.”</p>
+<p>– Attention Is All You Need, Vaswani et. al.</p>
 <p><span class="math notranslate nohighlight">\(Attention(Q,K,V) = softmax( \frac{QK^{T}} {\sqrt{d_{k}}} )V\)</span></p>
-<p>Let’s consider a single sequence of three tokens. This sequence can represent a senetence. The three tokens are 1,2 and 3.</p>
+<p>Let’s consider a single sequence of three tokens. This sequence can represent a senetence. For example, something like ‘sky is blue’. The three tokens are 1,2 and 3.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -126,23 +127,26 @@
 tensor([[1, 2, 3]])
 </pre></div></div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-</div>
 <p>let’s assume that the embedding vectors of 1,2 and 3 are as follows.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.0720</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5001</span><span class="p">],</span> <span class="mi">2</span><span class="p">:</span>  <span class="p">[</span><span class="o">-</span><span class="mf">0.0020</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">],</span> <span class="mi">3</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0020</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">]}</span>
+<span class="n">embeddings</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{1: [-1.072, -0.5001], 2: [-0.002, -0.4311], 3: [-0.002, -0.4311]}
+</pre></div></div>
+</div>
+<p>Therefore, our embedded tokens are,</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -192,14 +196,6 @@ tensor([[-1.0720, -0.5001],
 
 <span class="n">WV</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.2045</span><span class="p">,</span>  <span class="mf">0.1210</span><span class="p">],</span>
         <span class="p">[</span><span class="o">-</span><span class="mf">0.1712</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4462</span><span class="p">]])</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>
@@ -284,6 +280,14 @@ tensor([[0.3048, 0.0934],
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d_k</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Graph Convolutional Networks &mdash; deep learning .1 documentation</title>
+  <title>Graph Convolutional Networks (GCN) &mdash; deep learning .1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
@@ -73,7 +73,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Graph Convolutional Networks</li>
+      <li class="breadcrumb-item active">Graph Convolutional Networks (GCN)</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../_sources/docs/docs/tutorials/gnns/gcn.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -83,8 +83,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="Graph-Convolutional-Networks">
-<h1>Graph Convolutional Networks<a class="headerlink" href="#Graph-Convolutional-Networks" title="Link to this heading"></a></h1>
+  <section id="Graph-Convolutional-Networks-(GCN)">
+<h1>Graph Convolutional Networks (GCN)<a class="headerlink" href="#Graph-Convolutional-Networks-(GCN)" title="Link to this heading"></a></h1>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -98,7 +98,7 @@
 </pre></div>
 </div>
 </div>
-<p>Let’s build a graph convolutional neural network. I will use the definition of a GCN layer given in the torch_geometric dicumentation.</p>
+<p>Let’s build a graph convolutional neural network. The equation to update node features in GCNs can be defined as below.</p>
 <p><span class="math notranslate nohighlight">\(x_{i}^{(k)} = \sum_{j \in N(i) \bigcup i} \frac{1}{\sqrt(deg(i))\cdot\sqrt(deg(j)) } \cdot (W^{T} \cdot x_{j}^{(k-1)})+b\)</span></p>
 <p><span class="math notranslate nohighlight">\(x\)</span> are node features. <span class="math notranslate nohighlight">\(N(i)\)</span> are the neighbors of node <span class="math notranslate nohighlight">\(i\)</span> <span class="math notranslate nohighlight">\(deg(i)\)</span> and <span class="math notranslate nohighlight">\(deg(j)\)</span> are the degrees of nodes <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span>. The degree refers to the number of edges attached to a given node. <span class="math notranslate nohighlight">\(W\)</span> is a matrix that transforms the node features. The elements of this matrix are trainable. <span class="math notranslate nohighlight">\(b\)</span> is a bias value.</p>
 <p>Here, k is used to denote the graph convolution layer. This can be identified as a single pass through the graph convolution operation. In other words, a single iteration of using the above equation on the current set of node (and/or edge) features.</p>
