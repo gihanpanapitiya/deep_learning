@@ -880,7 +880,7 @@
    "id": "d44828b4-5973-4da4-aaff-7997671f1c09",
    "metadata": {},
    "source": [
-    "$\\vec{Q_{i}}$ contains information about whate each token is looking for. $\\vec{K_{j}}$ is about what information each token has. We calculate dot products between $\\vec{Q_{i}}$ and $\\vec{K_{j}}$ to figure out how closely related they are, and use them as weights to muliply our feature vectors, $\\vec{V_{j}}$ to get updated feature vectors $\\vec{O_{j}}$."
+    "$\\vec{Q_{i}}$ can be thought of as containing information about what each token is looking for. $\\vec{K_{j}}$ is about what information each token has. We calculate dot products between $\\vec{Q_{i}}$ and $\\vec{K_{j}}$ to figure out how closely related they are, and use them as weights to muliply our feature vectors, $\\vec{V_{j}}$ to get updated feature vectors $\\vec{O_{j}}$."
    ]
   },
   {
