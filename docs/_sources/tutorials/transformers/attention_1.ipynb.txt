@@ -27,7 +27,7 @@
    "id": "8b94ec84-15e1-4776-b9f5-52589fc5b644",
    "metadata": {},
    "source": [
-    "![title](images/self_attention.png)"
+    "![title](assets/self_attention.png)"
    ]
   },
   {

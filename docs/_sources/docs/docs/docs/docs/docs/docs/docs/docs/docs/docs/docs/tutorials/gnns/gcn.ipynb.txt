@@ -5,24 +5,15 @@
    "id": "01a4a79a",
    "metadata": {},
    "source": [
-    "# Graph Convolutional Networks (GCN)"
+    "# Graph Convolutional Networks"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 1,
+   "execution_count": null,
    "id": "b6352d74-08f4-489b-bafb-03116d52d26f",
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "/Users/gihan/.env/p11/lib/python3.11/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html\n",
-      "  from .autonotebook import tqdm as notebook_tqdm\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "import torch.nn as nn\n",
     "import torch\n",
@@ -37,7 +28,7 @@
    "id": "1e8dbb55-4380-4a6a-9c08-e76eeada4f8a",
    "metadata": {},
    "source": [
-    "Let's build a graph convolutional neural network. The equation to update node features in GCNs can be defined as below."
+    "Let's build a graph convolutional neural network. I will use the definition of a GCN layer given in the torch_geometric dicumentation."
    ]
   },
   {
@@ -158,7 +149,7 @@
    "id": "74fe7ca1-81db-4d43-93a1-1526fa47e2b4",
    "metadata": {},
    "source": [
-    "### Let's understand what happens at each line of the forward method."
+    "## Let's understand what happens at each line of the forward method."
    ]
   },
   {
@@ -477,21 +468,9 @@
    "source": []
   },
   {
-   "cell_type": "markdown",
-   "id": "6c59f6ba-860d-4dbf-891a-1f9eb4d05210",
-   "metadata": {},
-   "source": [
-    "---\n",
-    "\n",
-    "[![Ask questions](https://img.shields.io/static/v1.svg?logo=star&label=❔&message=Ask%20Questions&color=9cf)](https://github.com/gihanpanapitiya/deep_learning/issues)  If you have any questions, please add an issue on GitHub. \n",
-    "\n",
-    "---"
-   ]
-  },
-  {
    "cell_type": "code",
    "execution_count": null,
-   "id": "57d0032c-92fe-44ad-bf90-fdc5dfd56a01",
+   "id": "2a29ce4f-7d0f-4767-9818-cf44dbd92392",
    "metadata": {},
    "outputs": [],
    "source": []

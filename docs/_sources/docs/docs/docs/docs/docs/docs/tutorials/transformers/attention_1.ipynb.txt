@@ -10,7 +10,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 1,
+   "execution_count": 2,
    "id": "4787ffc8-ac76-460b-9ce5-e46e2d4c5755",
    "metadata": {},
    "outputs": [],
@@ -20,14 +20,6 @@
     "import torch.nn.functional as F\n",
     "import torch\n",
     "import torch.nn as nn"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "8b94ec84-15e1-4776-b9f5-52589fc5b644",
-   "metadata": {},
-   "source": [
-    "![title](assets/self_attention.png)"
    ]
   },
   {
@@ -76,7 +68,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 2,
+   "execution_count": 4,
    "id": "cf8ce180",
    "metadata": {},
    "outputs": [],
@@ -86,7 +78,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": 5,
    "id": "98d136b9-b6db-42ad-96c2-6f84d126b63d",
    "metadata": {},
    "outputs": [
@@ -96,7 +88,7 @@
        "tensor([[1, 2, 3]])"
       ]
      },
-     "execution_count": 3,
+     "execution_count": 5,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -131,23 +123,23 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": 6,
    "id": "7dddf9ce-6d6e-49f6-b9ba-4f18469ede60",
    "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "{1: [-1.072, -0.5001], 2: [-0.012, -0.4311], 3: [-0.005, -0.5321]}"
+       "{1: [-1.072, -0.5001], 2: [-0.002, -0.4311], 3: [-0.002, -0.4311]}"
       ]
      },
-     "execution_count": 4,
+     "execution_count": 6,
      "metadata": {},
      "output_type": "execute_result"
     }
    ],
    "source": [
-    "embeddings = {1: [-1.0720, -0.5001], 2:  [-0.0120, -0.4311], 3: [-0.0050, -0.5321]}\n",
+    "embeddings = {1: [-1.0720, -0.5001], 2:  [-0.0020, -0.4311], 3: [-0.0020, -0.4311]}\n",
     "embeddings"
    ]
   },
@@ -161,17 +153,17 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": 7,
    "id": "4c0e9092",
    "metadata": {},
    "outputs": [],
    "source": [
-    "embedded_tokens = torch.tensor([[-1.0720, -0.5001], [-0.0120, -0.4311], [-0.0050, -0.5321] ])"
+    "embedded_tokens = torch.tensor([[-1.0720, -0.5001], [-0.0020, -0.4311], [-0.0020, -0.4311] ])"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": 8,
    "id": "5c1fd4b6-d734-4769-bf90-9219170b6747",
    "metadata": {},
    "outputs": [
@@ -179,11 +171,11 @@
      "data": {
       "text/plain": [
        "tensor([[-1.0720, -0.5001],\n",
-       "        [-0.0120, -0.4311],\n",
-       "        [-0.0050, -0.5321]])"
+       "        [-0.0020, -0.4311],\n",
+       "        [-0.0020, -0.4311]])"
       ]
      },
-     "execution_count": 6,
+     "execution_count": 8,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -218,7 +210,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
+   "execution_count": 9,
    "id": "cea2dcd5-ab1a-47de-93f1-94e0892401d1",
    "metadata": {},
    "outputs": [],
@@ -251,7 +243,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 8,
+   "execution_count": 15,
    "id": "9c9e25da-d436-40da-b0d6-644991d6e671",
    "metadata": {},
    "outputs": [],
@@ -263,7 +255,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 9,
+   "execution_count": 16,
    "id": "32fc41a5-2b0c-4a22-b9e6-95f7f4e33a66",
    "metadata": {},
    "outputs": [
@@ -271,11 +263,11 @@
      "data": {
       "text/plain": [
        "tensor([[0.2261, 0.7422],\n",
-       "        [0.1702, 0.2896],\n",
-       "        [0.2098, 0.3536]], grad_fn=<MmBackward0>)"
+       "        [0.1699, 0.2857],\n",
+       "        [0.1699, 0.2857]], grad_fn=<MmBackward0>)"
       ]
      },
-     "execution_count": 9,
+     "execution_count": 16,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -286,7 +278,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 10,
+   "execution_count": 17,
    "id": "ffaf9dd2-1980-417f-82cf-dda918a5f6de",
    "metadata": {},
    "outputs": [
@@ -294,11 +286,11 @@
      "data": {
       "text/plain": [
        "tensor([[ 0.4986, -0.5362],\n",
-       "        [ 0.0550,  0.0647],\n",
-       "        [ 0.0639,  0.0855]], grad_fn=<MmBackward0>)"
+       "        [ 0.0509,  0.0705],\n",
+       "        [ 0.0509,  0.0705]], grad_fn=<MmBackward0>)"
       ]
      },
-     "execution_count": 10,
+     "execution_count": 17,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -309,7 +301,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
+   "execution_count": 18,
    "id": "bad769b3-08c1-4137-b09b-32ba3cf25317",
    "metadata": {},
    "outputs": [
@@ -317,11 +309,11 @@
      "data": {
       "text/plain": [
        "tensor([[0.3048, 0.0934],\n",
-       "        [0.0763, 0.1909],\n",
-       "        [0.0921, 0.2368]], grad_fn=<MmBackward0>)"
+       "        [0.0742, 0.1921],\n",
+       "        [0.0742, 0.1921]], grad_fn=<MmBackward0>)"
       ]
      },
-     "execution_count": 11,
+     "execution_count": 18,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -508,19 +500,19 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 12,
+   "execution_count": 23,
    "id": "03f96b33-4adc-48c0-983f-c47f3a67ac9b",
    "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "tensor([[-0.2853,  0.0604,  0.0779],\n",
-       "        [-0.0704,  0.0281,  0.0356],\n",
-       "        [-0.0850,  0.0344,  0.0436]], grad_fn=<MmBackward0>)"
+       "tensor([[-0.2853,  0.0638,  0.0638],\n",
+       "        [-0.0685,  0.0288,  0.0288],\n",
+       "        [-0.0685,  0.0288,  0.0288]], grad_fn=<MmBackward0>)"
       ]
      },
-     "execution_count": 12,
+     "execution_count": 23,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -559,7 +551,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
+   "execution_count": 25,
    "id": "b4693965",
    "metadata": {},
    "outputs": [],
@@ -585,7 +577,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 14,
+   "execution_count": 26,
    "id": "28f7d892-414f-4d6a-b189-c380fb49c5ca",
    "metadata": {},
    "outputs": [],
@@ -595,19 +587,19 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 15,
+   "execution_count": 27,
    "id": "61cc140c-e29b-4449-9ffb-1eda8a23c0f5",
    "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "tensor([[-0.2017,  0.0427,  0.0551],\n",
-       "        [-0.0498,  0.0199,  0.0252],\n",
-       "        [-0.0601,  0.0243,  0.0309]], grad_fn=<DivBackward0>)"
+       "tensor([[-0.2017,  0.0451,  0.0451],\n",
+       "        [-0.0484,  0.0204,  0.0204],\n",
+       "        [-0.0484,  0.0204,  0.0204]], grad_fn=<DivBackward0>)"
       ]
      },
-     "execution_count": 15,
+     "execution_count": 27,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -642,7 +634,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 16,
+   "execution_count": 28,
    "id": "0fd5a91f-5c31-4661-8717-1cdd3e1671cc",
    "metadata": {},
    "outputs": [],
@@ -652,19 +644,19 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 17,
+   "execution_count": 29,
    "id": "61cb7e78-2659-4051-84c9-8c5423792360",
    "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "tensor([[0.2801, 0.3577, 0.3622],\n",
-       "        [0.3175, 0.3404, 0.3422],\n",
-       "        [0.3141, 0.3418, 0.3441]], grad_fn=<SoftmaxBackward0>)"
+       "tensor([[0.2809, 0.3595, 0.3595],\n",
+       "        [0.3182, 0.3409, 0.3409],\n",
+       "        [0.3182, 0.3409, 0.3409]], grad_fn=<SoftmaxBackward0>)"
       ]
      },
-     "execution_count": 17,
+     "execution_count": 29,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -683,7 +675,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 18,
+   "execution_count": 35,
    "id": "e20f93e6-680c-4a83-bb39-6adf5dcd6976",
    "metadata": {},
    "outputs": [
@@ -693,7 +685,7 @@
      "text": [
       "tensor(1., grad_fn=<SumBackward0>)\n",
       "tensor(1., grad_fn=<SumBackward0>)\n",
-      "tensor(1.0000, grad_fn=<SumBackward0>)\n"
+      "tensor(1., grad_fn=<SumBackward0>)\n"
      ]
     }
    ],
@@ -729,248 +721,62 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 19,
+   "execution_count": 38,
    "id": "9af3135b-4a41-47cf-b1e7-970dc33d9907",
    "metadata": {},
    "outputs": [
     {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "tensor([[0.1460, 0.1802],\n",
-      "        [0.1543, 0.1757],\n",
-      "        [0.1535, 0.1761]], grad_fn=<MmBackward0>)\n"
-     ]
+     "data": {
+      "text/plain": [
+       "tensor([[0.1390, 0.1644],\n",
+       "        [0.1476, 0.1607],\n",
+       "        [0.1476, 0.1607]], grad_fn=<MmBackward0>)"
+      ]
+     },
+     "execution_count": 38,
+     "metadata": {},
+     "output_type": "execute_result"
     }
    ],
    "source": [
-    "O = attention_weights @ V\n",
-    "\n",
-    "print(O)"
+    "attention_weights @ V"
    ]
   },
   {
-   "cell_type": "markdown",
-   "id": "b56f6bec-ed0c-4713-8f9d-9c8739ea8944",
+   "cell_type": "code",
+   "execution_count": 41,
+   "id": "6e23898a-08f7-41e4-9b6e-fc925ff0d594",
    "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[0.1390, 0.1644],\n",
+       "        [0.1476, 0.1607],\n",
+       "        [0.1476, 0.1607]], grad_fn=<MmBackward0>)"
+      ]
+     },
+     "execution_count": 41,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
-    "$$ O = \\begin{bmatrix} O_{1,1} & O_{1,2} \\\\ O_{2,1} & O_{2,2}  \\\\ O_{3,1} & O_{3,2} \\end{bmatrix}$$"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "604c6f37-c00f-40af-b602-386399b09a65",
-   "metadata": {},
-   "source": [
-    "let's try to understand the meaning of the output values."
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "362e10b0-4f34-4148-ab0e-96a427dd6502",
-   "metadata": {},
-   "source": [
-    "Below is how we obtained the $O_{1,1}$ output values matrix."
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "2f9778db-39ea-4994-84ca-317e7f000aa4",
-   "metadata": {},
-   "source": [
-    "$O_{1,1}$ = $\\vec{Q_{1}}$,$\\vec{K_{1}}$ similarity * $V_{1,1}$ + \n",
-    "$\\vec{Q_{1}}$,$\\vec{K_{2}}$ similarity * $V_{2,1}$ +\n",
-    "$\\vec{Q_{1}}$,$\\vec{K_{3}}$ similarity * $V_{3,1}$"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "297333d2-43a1-4613-9207-8e7a80719c42",
-   "metadata": {},
-   "source": [
-    "$O_{1,2}$ = $\\vec{Q_{1}}$,$\\vec{K_{1}}$ similarity * $V_{1,2}$ + \n",
-    "$\\vec{Q_{1}}$,$\\vec{K_{2}}$ similarity * $V_{2,2}$ +\n",
-    "$\\vec{Q_{1}}$,$\\vec{K_{3}}$ similarity * $V_{3,2}$"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "7dae8bfd-dd4a-4f14-88cb-8c83e0c153e0",
-   "metadata": {},
-   "source": [
-    "$O_{2,1}$ = $\\vec{Q_{2}}$,$\\vec{K_{1}}$ similarity * $V_{1,1}$ + \n",
-    "$\\vec{Q_{2}}$,$\\vec{K_{2}}$ similarity * $V_{2,1}$ +\n",
-    "$\\vec{Q_{2}}$,$\\vec{K_{3}}$ similarity * $V_{3,1}$"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "bdf7e8ed-45a4-4523-9dd5-7b6b30b54a11",
-   "metadata": {},
-   "source": [
-    "$O_{2,2}$ = $\\vec{Q_{2}}$,$\\vec{K_{1}}$ similarity * $V_{1,2}$ + \n",
-    "$\\vec{Q_{2}}$,$\\vec{K_{2}}$ similarity * $V_{2,2}$ +\n",
-    "$\\vec{Q_{2}}$,$\\vec{K_{3}}$ similarity * $V_{3,2}$"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "964070a8-7aca-4d30-b20b-b227ef6be988",
-   "metadata": {},
-   "source": [
-    "Think of this as obtaining a weighted feature values. $\\vec{Q_{i}}.\\vec{K_{j}}$ are the weights. $V_{j}$ are the input features. $O_{j}$ are the output features."
+    "torch.matmul(attention_weights, V)"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "05a2bffa-4fac-4e73-9e41-9fab137604ee",
+   "id": "637f8d3c-de6a-47e7-aa86-23b6518d1623",
    "metadata": {},
    "outputs": [],
    "source": []
   },
   {
-   "cell_type": "markdown",
-   "id": "e042a9fc-6519-4d97-8790-ca98558b2c46",
-   "metadata": {},
-   "source": [
-    "Let's try to demistify this further."
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "8d6754b7-7967-45fa-b777-6697632659a1",
-   "metadata": {},
-   "source": [
-    "$O_{1,1}$ = ($\\vec{Q_{1}}$,$\\vec{K_{1}}$ similarity $\\times$ $1^{st}$ feature of token 1) + \n",
-    "($\\vec{Q_{1}}$,$\\vec{K_{2}}$ similarity $\\times$ $1^{st}$ feature of token 2) +\n",
-    "($\\vec{Q_{1}}$,$\\vec{K_{3}}$ similarity $\\times$ $1^{st}$ feature of token 3)"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "f39b9865-e22d-4cf9-8d06-5e0095cad7ee",
-   "metadata": {},
-   "source": [
-    "$O_{2,1}$ = ($\\vec{Q_{2}}$,$\\vec{K_{1}}$ similarity $\\times$ $1^{st}$ feature of token 1) + \n",
-    "($\\vec{Q_{2}}$,$\\vec{K_{2}}$ similarity $\\times$ $1^{st}$ feature of token 2) +\n",
-    "($\\vec{Q_{2}}$,$\\vec{K_{3}}$ similarity $\\times$ $1^{st}$ feature of token 3)"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "5d04f91d-e508-4699-864f-f2c261a828af",
-   "metadata": {},
-   "source": [
-    "Notice that the index of the token is equal to the index of the Key in each \"$\\vec{Q}$, $\\vec{K}$ $\\times$ feature token\" part above."
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "79a383df-2275-418f-b56a-18303295143c",
-   "metadata": {},
-   "source": [
-    "We get large values for elements in $\\vec{O_{1}}$, when any of $\\vec{K_{1}}$, $\\vec{K_{2}}$, or $\\vec{K_{3}}$ has a large dot product with $\\vec{Q_{1}}$.\n",
-    "\n",
-    "We get large values for elements in $\\vec{O_{2}}$, when any of $\\vec{K_{1}}$, $\\vec{K_{2}}$, or $\\vec{K_{3}}$ has a large dot product with $\\vec{Q_{2}}$."
-   ]
-  },
-  {
    "cell_type": "code",
    "execution_count": null,
-   "id": "db3996c9-a64b-4678-a956-a7d8d49bb179",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "markdown",
-   "id": "d44828b4-5973-4da4-aaff-7997671f1c09",
-   "metadata": {},
-   "source": [
-    "$\\vec{Q_{i}}$ can be thought of as containing information about what each token is looking for. $\\vec{K_{j}}$ is about what information each token has. We calculate dot products between $\\vec{Q_{i}}$ and $\\vec{K_{j}}$ to figure out how closely related they are, and use them as weights to muliply our feature vectors, $\\vec{V_{j}}$ to get updated feature vectors $\\vec{O_{j}}$."
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "fcb15fb4-4b54-46d7-8af1-ece8701be405",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "markdown",
-   "id": "a1b610e7-15b9-49a2-a225-d0a5837a0c31",
-   "metadata": {},
-   "source": [
-    "Using the words of our sequence as the indices,"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "68acfa7b-900d-4dd8-967b-0d99e236992d",
-   "metadata": {},
-   "source": [
-    "$O_{sky,1}$ = $Q_{sky}$,$K_{sky}$ similarity * $V_{sky,1}$ + \n",
-    "$Q_{sky}$,$K_{is}$ similarity * $V_{is,1}$ +\n",
-    "$Q_{sky}$,$K_{blue}$ similarity * $V_{blue,1}$"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "6c30fb18-1cf0-4955-8eb4-e37fec3c5863",
-   "metadata": {},
-   "source": [
-    "$O_{sky,2}$ = $Q_{sky}$,$K_{sky}$ similarity * $V_{sky,2}$ + \n",
-    "$Q_{sky}$,$K_{is}$ similarity * $V_{is,2}$ +\n",
-    "$Q_{sky}$,$K_{blue}$ similarity * $V_{blue,2}$"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "d0cd3337-c3ce-4075-86e3-e7dbd51c1125",
-   "metadata": {},
-   "source": [
-    "$O_{is,1}$ = $\\vec{Q_{is}}$,$\\vec{K_{sky}}$ similarity * $V_{sky,1}$ + \n",
-    "$\\vec{Q_{is}}$,$\\vec{K_{is}}$ similarity * $V_{is,1}$ +\n",
-    "$\\vec{Q_{is}}$,$\\vec{K_{blue}}$ similarity * $V_{blue,1}$"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "1a9cc69e-7c51-4d29-a230-5c96a768f67d",
-   "metadata": {},
-   "source": [
-    "$O_{is,2}$ = $\\vec{Q_{is}}$,$\\vec{K_{sky}}$ similarity * $V_{sky,2}$ + \n",
-    "$\\vec{Q_{is}}$,$\\vec{K_{is}}$ similarity * $V_{is,2}$ +\n",
-    "$\\vec{Q_{is}}$,$\\vec{K_{blue}}$ similarity * $V_{blue,2}$"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "7f6286ad-6e13-4dba-a376-127a10418b37",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "markdown",
-   "id": "38c84e9d-a114-4440-a0df-7b8a01e9ff20",
-   "metadata": {},
-   "source": [
-    "---\n",
-    "\n",
-    "[![Ask questions](https://img.shields.io/static/v1.svg?logo=star&label=❔&message=Ask%20Questions&color=9cf)](https://github.com/gihanpanapitiya/deep_learning/issues)  If you have any questions, please add an issue on GitHub. \n",
-    "\n",
-    "---"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "1dbdc51a-3f33-42b8-820e-d7a36caedb7f",
+   "id": "b95d4f80-d82d-4b94-add9-3429603edf6f",
    "metadata": {},
    "outputs": [],
    "source": []

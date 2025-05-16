@@ -1,0 +1,1130 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "94d5821e",
+   "metadata": {},
+   "source": [
+    "# Self Attention"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "152163ef-c296-4e80-8a77-88a10e442999",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import torch\n",
+    "import math\n",
+    "import torch.nn.functional as F"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "38213e47-6015-4fa3-8012-a19e6b87cdd5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def scaled_dot_product(q, k, v, mask=None):\n",
+    "    d_k = q.size()[-1]\n",
+    "    attn_logits = torch.matmul(q, k.transpose(-2, -1))\n",
+    "    attn_logits = attn_logits / math.sqrt(d_k)\n",
+    "    if mask is not None:\n",
+    "        attn_logits = attn_logits.masked_fill(mask == 0, -9e15)\n",
+    "    attention = F.softmax(attn_logits, dim=-1)\n",
+    "    values = torch.matmul(attention, v)\n",
+    "    return values, attention"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "fca4bf41-63ee-46c4-bee9-c9daf289778d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "seq_len, d_k = 3, 2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "f08597af-4e8b-4386-ab8f-afd466f93094",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Q = torch.tensor([[ 1.0463, -1.2652],\n",
+    "        [ 0.0063,  0.9499],\n",
+    "        [-0.7820, -0.7173]])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "120eb74c-7034-4854-93a1-37c56bcfabc3",
+   "metadata": {},
+   "source": [
+    "$$ Q = \\begin{bmatrix} Q_{1,1} & Q_{1,2} \\\\ Q_{2,1} & Q_{2,2} \\\\ Q_{3,1} & Q_{3,2} \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "97773379-37de-477f-b75a-973c03617aed",
+   "metadata": {},
+   "source": [
+    "$$ Q = \\begin{bmatrix} \\vec{Q_{1}} \\\\ \\vec{Q_{2}} \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "aca9a37f-6463-49eb-8257-93b410ae7172",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "K = torch.tensor([[-1.1701, -1.6579],\n",
+    "        [-0.9172, -0.2540],\n",
+    "        [-0.1772,  0.1998]])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3be5011c-5842-4b69-929c-c5478b1a2035",
+   "metadata": {},
+   "source": [
+    "$$ K = \\begin{bmatrix} K_{1,1} & K_{1,2} \\\\ K_{2,1} & K_{2,2} \\\\ K_{3,1} & K_{3,2} \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "16658adc-c4d0-4c0d-b130-f1008f9865d7",
+   "metadata": {},
+   "source": [
+    "$$ K^{T} = \\begin{bmatrix} \\vec{K_{1}} \\\\ \\vec{K_{2}} \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "72e047c5-0ccc-4242-b25d-970a11f4c22c",
+   "metadata": {},
+   "source": [
+    "$$ K^{T} = \\begin{bmatrix} K_{1,1} & K_{2,1} \\\\ K_{1,2} & K_{2,2} \\\\ K_{1,3} & K_{2,3} \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "de20eb10-10a8-4dc1-93a0-8620d2fe46b4",
+   "metadata": {},
+   "source": [
+    "<!-- $$ K = \\begin{bmatrix} \\vec{K_{1}} \\\\ \\vec{K_{2}} \\\\ \\vec{K_{3}} \\end{bmatrix}$$ -->"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "080d2860-f333-428c-82d5-17894798f90d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "V = torch.tensor([[-0.5293,  0.1230],\n",
+    "        [-0.7970,  1.0645],\n",
+    "        [-0.6991,  0.2718]])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "56bdba19-c34b-481e-9cf3-04c9292f07c2",
+   "metadata": {},
+   "source": [
+    "$$ V = \\begin{bmatrix} V_{1,1} & V_{1,2} \\\\ V_{2,1} & V_{2,2}  \\\\ V_{3,1} & V_{3,2} \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "ad56f450-dc4f-4a9a-8c8f-f5325b047c1a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "values, attention = scaled_dot_product(Q, K, V)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "df4e3a0e-f05e-48ad-b70b-58d40d1581d4",
+   "metadata": {},
+   "source": [
+    "what happens in attention"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "269fc364-8c22-4217-8957-702600226885",
+   "metadata": {},
+   "source": [
+    "$$ QK^{T} = \\begin{bmatrix} Q_{1,1}\\times K_{1,1} + Q_{1,2}\\times K_{1,2} &\n",
+    "Q_{1,1}\\times K_{2,1} + Q_{1,2}\\times K_{2,2} & \n",
+    "Q_{1,1}\\times K_{3,1} + Q_{1,2}\\times K_{3,2} \\\\ \n",
+    "Q_{2,1}\\times K_{1,1} + Q_{2,2}\\times K_{1,2} & \n",
+    "Q_{2,1}\\times K_{2,1} + Q_{2,2}\\times K_{2,2} & \n",
+    "Q_{2,1}\\times K_{3,1} + Q_{2,2}\\times K_{3,2} \\\\\n",
+    "Q_{3,1}\\times K_{1,1} + Q_{3,2}\\times K_{1,2} & \n",
+    "Q_{3,1}\\times K_{2,1} + Q_{3,2}\\times K_{2,2} & \n",
+    "Q_{3,1}\\times K_{3,1} + Q_{3,2}\\times K_{3,2} \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4ae4f5b9-a138-4438-b819-b25680a8f313",
+   "metadata": {},
+   "source": [
+    "$$ QK^{T} = \\begin{bmatrix} \\vec{Q_{1}}\\cdot \\vec{K_{1}} & \n",
+    "\\vec{Q_{1}}\\cdot \\vec{K_{2}} & \n",
+    "\\vec{Q_{1}}\\cdot \\vec{K_{3}} \\\\ \n",
+    "\\vec{Q_{2}}\\cdot \\vec{K_{1}} & \n",
+    "\\vec{Q_{2}}\\cdot \\vec{K_{2}} & \n",
+    "\\vec{Q_{2}}\\cdot \\vec{K_{3}} \\\\\n",
+    "\\vec{Q_{3}}\\cdot \\vec{K_{1}} & \n",
+    "\\vec{Q_{3}}\\cdot \\vec{K_{2}} & \n",
+    "\\vec{Q_{3}}\\cdot \\vec{K_{3}} \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "03f96b33-4adc-48c0-983f-c47f3a67ac9b",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[ 0.8733, -0.6383, -0.4382],\n",
+       "        [-1.5822, -0.2471,  0.1887],\n",
+       "        [ 2.1042,  0.8994, -0.0047]])"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attn_logits = torch.matmul(Q, K.T)\n",
+    "attn_logits"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "e7462ff6-04bc-4a8e-8979-1904f8bd8f0f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# torch.matmul(Q, K.transpose(-2, -1))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6e367763-2d13-4ea8-b427-56b67c2b8d3c",
+   "metadata": {},
+   "source": [
+    "what is $\\vec{Q_{1}}$? It is a representation of 1st sentence part. <br>\n",
+    "what is K1? It is another representation of 1st sentence part. <br>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1182962a-a37c-42b6-8ba5-660d07d1f658",
+   "metadata": {},
+   "source": [
+    "Each row of the attention matrix (softmax(QKTQK T)) contains weights representing how much a query (e.g., a word) \"pays attention\" to all other keys (words) in the sequence."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "96dec1b8-212c-440c-b8cc-29fc565370ec",
+   "metadata": {},
+   "source": [
+    "$$ QK^{T}/\\sqrt(d_{k}) = \\begin{bmatrix} \\frac{\\vec{Q_{1}}\\cdot \\vec{K_{1}}}{\\sqrt(d_{k})} & \n",
+    "\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{2}}}{ \\sqrt(d_{k}) } & \n",
+    "\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{3}}}{ \\sqrt(d_{k}) } \\\\ \n",
+    "\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{1}}}{ \\sqrt(d_{k}) } & \n",
+    "\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{2}}}{ \\sqrt(d_{k}) } & \n",
+    "\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{3}}}{ \\sqrt(d_{k}) } \\\\\n",
+    "\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{1}}}{ \\sqrt(d_{k}) } & \n",
+    "\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{2}}}{ \\sqrt(d_{k}) } & \n",
+    "\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{3}}}{ \\sqrt(d_{k}) } \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "28f7d892-414f-4d6a-b189-c380fb49c5ca",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "scaled_attention_logits = torch.matmul(Q, K.T)/ math.sqrt(d_k)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "id": "61cc140c-e29b-4449-9ffb-1eda8a23c0f5",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[ 0.6175, -0.4514, -0.3098],\n",
+       "        [-1.1188, -0.1747,  0.1334],\n",
+       "        [ 1.4879,  0.6360, -0.0034]])"
+      ]
+     },
+     "execution_count": 48,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "scaled_attention_logits"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "be3e6192-6540-48a8-aec8-a0c60d88e86e",
+   "metadata": {},
+   "source": [
+    "$$ softmax(QK^{T}/\\sqrt(d_{k})) = \\begin{bmatrix} \\frac{exp({\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{1}}}{\\sqrt(d_{k})}}) }{ exp({\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{1}}}{\\sqrt(d_{k})}}) + exp({\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{2}}}{\\sqrt(d_{k})}}) + \\exp({\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{3}}}{\\sqrt(d_{k})}})} & \n",
+    "\\frac{exp(\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{2}}}{ \\sqrt(d_{k}) })}{ exp({\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{1}}}{\\sqrt(d_{k})}}) + exp({\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{2}}}{\\sqrt(d_{k})}}) + \\exp({\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{3}}}{\\sqrt(d_{k})}})  } & \n",
+    "\\frac{exp(\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{3}}}{ \\sqrt(d_{k}) })}{ exp({\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{1}}}{\\sqrt(d_{k})}}) + exp({\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{2}}}{\\sqrt(d_{k})}}) + \\exp({\\frac{\\vec{Q_{1}}\\cdot \\vec{K_{3}}}{\\sqrt(d_{k})}}) } \\\\ \n",
+    "\\frac{exp(\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{1}}}{ \\sqrt(d_{k}) })}{ exp({\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{1}}}{\\sqrt(d_{k})}}) + exp({\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{2}}}{\\sqrt(d_{k})}}) + \\exp({\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{3}}}{\\sqrt(d_{k})}}) } & \n",
+    "\\frac{exp(\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{2}}}{ \\sqrt(d_{k}) })}{ exp({\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{1}}}{\\sqrt(d_{k})}}) + exp({\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{2}}}{\\sqrt(d_{k})}}) + \\exp({\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{3}}}{\\sqrt(d_{k})}}) } & \n",
+    "\\frac{exp(\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{3}}}{ \\sqrt(d_{k}) })}{ exp({\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{1}}}{\\sqrt(d_{k})}}) + exp({\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{2}}}{\\sqrt(d_{k})}}) + \\exp({\\frac{\\vec{Q_{2}}\\cdot \\vec{K_{3}}}{\\sqrt(d_{k})}}) } \\\\\n",
+    "\\frac{exp(\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{1}}}{ \\sqrt(d_{k}) })}{  exp({\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{1}}}{\\sqrt(d_{k})}}) + exp({\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{2}}}{\\sqrt(d_{k})}}) + \\exp({\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{3}}}{\\sqrt(d_{k})}}) } & \n",
+    "\\frac{exp(\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{2}}}{ \\sqrt(d_{k}) })}{ exp({\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{1}}}{\\sqrt(d_{k})}}) + exp({\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{2}}}{\\sqrt(d_{k})}}) + \\exp({\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{3}}}{\\sqrt(d_{k})}}) } & \n",
+    "\\frac{exp(\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{3}}}{ \\sqrt(d_{k}) })}{ exp({\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{1}}}{\\sqrt(d_{k})}}) + exp({\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{2}}}{\\sqrt(d_{k})}}) + \\exp({\\frac{\\vec{Q_{3}}\\cdot \\vec{K_{3}}}{\\sqrt(d_{k})}})  } \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 49,
+   "id": "0fd5a91f-5c31-4661-8717-1cdd3e1671cc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "attention_weights = F.softmax(scaled_attention_logits, dim=-1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "id": "61cb7e78-2659-4051-84c9-8c5423792360",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[0.5750, 0.1975, 0.2275],\n",
+       "        [0.1415, 0.3637, 0.4949],\n",
+       "        [0.6054, 0.2583, 0.1363]])"
+      ]
+     },
+     "execution_count": 50,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attention_weights"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "63c54673-add7-4173-877f-c25dccc60ffa",
+   "metadata": {},
+   "source": [
+    "you can see that values in each row add up to 1."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "id": "fadaa733-3243-4fd9-96e1-2c9dd87b2e72",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor(1.)"
+      ]
+     },
+     "execution_count": 52,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attention_weights[0].sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "id": "88e27a7d-731b-41a2-8131-0ba7d38e3dfe",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor(1.)"
+      ]
+     },
+     "execution_count": 53,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attention_weights[1].sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 54,
+   "id": "541bcdd1-9ada-4c84-8f94-5047f7fac678",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor(1.0000)"
+      ]
+     },
+     "execution_count": 54,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attention_weights[2].sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 65,
+   "id": "43f0daed-058d-457c-90fb-2ca144ee964c",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[0.5750, 0.1975, 0.2275],\n",
+       "        [0.1415, 0.3637, 0.4949],\n",
+       "        [0.6054, 0.2583, 0.1363]])"
+      ]
+     },
+     "execution_count": 65,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attention_weights"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 66,
+   "id": "4d13c84d-8ddf-4eda-b2d3-b5aaeb8e197d",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[-0.5293,  0.1230],\n",
+       "        [-0.7970,  1.0645],\n",
+       "        [-0.6991,  0.2718]])"
+      ]
+     },
+     "execution_count": 66,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "V"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c6731b50-f544-483d-bfd8-c6be7d4f08fa",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 63,
+   "id": "6e23898a-08f7-41e4-9b6e-fc925ff0d594",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[-0.6208,  0.3428],\n",
+       "        [-0.7107,  0.5390],\n",
+       "        [-0.6216,  0.3864]])"
+      ]
+     },
+     "execution_count": 63,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.matmul(attention_weights, V)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 64,
+   "id": "d6e8667e-f1bd-40f0-9911-8305445a8ea7",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[-0.5293,  0.1230],\n",
+       "        [-0.7970,  1.0645],\n",
+       "        [-0.6991,  0.2718]])"
+      ]
+     },
+     "execution_count": 64,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "V"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "637f8d3c-de6a-47e7-aa86-23b6518d1623",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "0d6a6924-736b-4cee-9d64-2fdc3a8c6c88",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([ 1.0463, -1.2652])"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "Q[0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "5bdcf0ef-d0f1-49c3-85c5-b273bec80aa6",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([-1.1701, -1.6579])"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "K.T[:,0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "2f947668-a763-40a3-a628-9a2c7093d68e",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor(0.8733)"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.dot(Q[0],  K.T[:,0])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "id": "6defb51e-1f81-4500-9193-6937c4a0de8d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "d_k = Q.size()[-1]\n",
+    "attn_logits = torch.matmul(Q, K.transpose(-2, -1))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "id": "079b0a0a-bcd4-4673-9d1f-c6e92275300f",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[ 0.8733, -0.6383, -0.4382],\n",
+       "        [-1.5822, -0.2471,  0.1887],\n",
+       "        [ 2.1042,  0.8994, -0.0047]])"
+      ]
+     },
+     "execution_count": 26,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attn_logits"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "id": "261ccebc-f640-41f4-84d8-acd7bad880a4",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[ 0.8733, -1.5822,  2.1042],\n",
+       "        [-0.6383, -0.2471,  0.8994],\n",
+       "        [-0.4382,  0.1887, -0.0047]])"
+      ]
+     },
+     "execution_count": 27,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.matmul(K, Q.transpose(-2, -1))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "id": "47fa7744-302d-4a4c-bb56-b82c8b06ca54",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor(0.6175)"
+      ]
+     },
+     "execution_count": 28,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attn_logits[0][0]/math.sqrt(d_k)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "id": "529b8e0e-c2d0-4234-b47c-b0e1a35238df",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor(-0.4514)"
+      ]
+     },
+     "execution_count": 29,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attn_logits[0][1]/math.sqrt(d_k)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6c561599-d92c-4f7c-8e12-ec7f23e4e6af",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "id": "72b89f92-52fc-41e1-ad56-9aa8d981635e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "attn_logits = attn_logits / math.sqrt(d_k)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "id": "f1d43315-3b51-49d4-9a48-8e538764d10f",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[ 0.6175, -0.4514, -0.3098],\n",
+       "        [-1.1188, -0.1747,  0.1334],\n",
+       "        [ 1.4879,  0.6360, -0.0034]])"
+      ]
+     },
+     "execution_count": 31,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attn_logits"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9048e8f5-1abc-4d73-b5c8-6f3717db6c8b",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "id": "895d1ac0-b156-4d99-93bc-c6d500accf89",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mask = None"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "id": "1ab57092-737f-48b5-880b-593551e80e26",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "if mask is not None:\n",
+    "    attn_logits = attn_logits.masked_fill(mask == 0, -9e15)    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3e48a70e-3a3d-49e0-9595-9013770bfbdc",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "id": "28532c10-a972-4517-a85c-e20a3934b9b5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "attention = F.softmax(attn_logits, dim=-1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "id": "38b45de7-fa7b-4692-830c-c439558f8923",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[0.5750, 0.1975, 0.2275],\n",
+       "        [0.1415, 0.3637, 0.4949],\n",
+       "        [0.6054, 0.2583, 0.1363]])"
+      ]
+     },
+     "execution_count": 36,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attention"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fa72fbcc-c361-4668-8ba6-e3fe623f7828",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "id": "0c34df2a-dd6f-4d25-8b59-8ad6ff77809c",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor(0.8194)"
+      ]
+     },
+     "execution_count": 37,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.sum(attention[:, 1])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 38,
+   "id": "c2210cf9-2b71-4c0f-8adc-9c00eb6ab973",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor(1.)"
+      ]
+     },
+     "execution_count": 38,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.sum(attention[1, :])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 39,
+   "id": "8d251286-ff14-4fa4-bde3-1095591fdf83",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor(-0.1437)"
+      ]
+     },
+     "execution_count": 39,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.sum(attn_logits[0, :])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 40,
+   "id": "0398f97f-3cbe-403b-b763-0c0d08542805",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([0.5750, 0.1975, 0.2275])"
+      ]
+     },
+     "execution_count": 40,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.exp(attn_logits[0, :])/torch.sum(torch.exp(attn_logits[0, :]))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "id": "4fbb3016-a914-4218-bb5b-80ae4249803f",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([1.8543, 0.6368, 0.7336])"
+      ]
+     },
+     "execution_count": 42,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.exp(attn_logits[0, :])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "620c4377-ca53-4df6-9c71-f8d8d22b07c3",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 41,
+   "id": "9a581771-c1cc-4dc6-8bf6-8f48150914ee",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([0.1415, 0.3637, 0.4949])"
+      ]
+     },
+     "execution_count": 41,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.exp(attn_logits[1, :])/torch.sum(torch.exp(attn_logits[1, :]))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "id": "c6679c8f-b31e-47d7-87b7-cda9287f92ef",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([0.4905, 0.4635, 0.0460])"
+      ]
+     },
+     "execution_count": 48,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.exp(attn_logits[2, :])/torch.sum(torch.exp(attn_logits[2, :]))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e1e0c7f0-8473-452e-9f46-612307ed6049",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2ea24a17-4be9-4997-bb32-2a29219fa830",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "058c7b69-f0e6-47fc-9886-7677de91f49b",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "id": "6ce65b13-b005-45bf-9837-9f5658d0d53a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "values = torch.matmul(attention, v)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "id": "bba412a0-eefd-4537-a358-b7640f523d96",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[ 0.1270,  0.9533],\n",
+       "        [ 0.2498,  0.9650],\n",
+       "        [-0.2065,  0.8016]])"
+      ]
+     },
+     "execution_count": 28,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "id": "965e9c25-b4b4-4fa1-b6dd-989fc001c64c",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[-0.5255,  1.2225],\n",
+       "        [ 0.0399,  0.3073],\n",
+       "        [ 0.7107,  1.2939]])"
+      ]
+     },
+     "execution_count": 29,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "v"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "id": "a59ef549-049c-4398-b19a-9596bb597860",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([0.2965, 0.3237, 0.3798])"
+      ]
+     },
+     "execution_count": 52,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "attention[0,:]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "id": "16cbf5dd-c13f-4b5e-88ae-d44f05fc092a",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor(0.1270)"
+      ]
+     },
+     "execution_count": 50,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.dot(attention[0,:], v[:,0])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 51,
+   "id": "52a0e2ae-87bc-452d-9c54-03ca1a101413",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor(0.9533)"
+      ]
+     },
+     "execution_count": 51,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "torch.dot(attention[0,:], v[:,1])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "98f2ca9d-b00b-400a-8041-c1b8e760e33d",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "p11",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

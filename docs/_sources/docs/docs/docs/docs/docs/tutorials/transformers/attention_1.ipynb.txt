@@ -24,14 +24,6 @@
   },
   {
    "cell_type": "markdown",
-   "id": "8b94ec84-15e1-4776-b9f5-52589fc5b644",
-   "metadata": {},
-   "source": [
-    "![title](assets/self_attention.png)"
-   ]
-  },
-  {
-   "cell_type": "markdown",
    "id": "93019565",
    "metadata": {},
    "source": [
@@ -799,8 +791,8 @@
    "metadata": {},
    "source": [
     "$O_{2,1}$ = $\\vec{Q_{2}}$,$\\vec{K_{1}}$ similarity * $V_{1,1}$ + \n",
-    "$\\vec{Q_{2}}$,$\\vec{K_{2}}$ similarity * $V_{2,1}$ +\n",
-    "$\\vec{Q_{2}}$,$\\vec{K_{3}}$ similarity * $V_{3,1}$"
+    "$\\vec{Q_{2}}$,$\\vec{K_{K}}$ similarity * $V_{2,1}$ +\n",
+    "$\\vec{Q_{3}}$,$\\vec{K_{3}}$ similarity * $V_{3,1}$"
    ]
   },
   {
@@ -888,89 +880,13 @@
    "id": "d44828b4-5973-4da4-aaff-7997671f1c09",
    "metadata": {},
    "source": [
-    "$\\vec{Q_{i}}$ can be thought of as containing information about what each token is looking for. $\\vec{K_{j}}$ is about what information each token has. We calculate dot products between $\\vec{Q_{i}}$ and $\\vec{K_{j}}$ to figure out how closely related they are, and use them as weights to muliply our feature vectors, $\\vec{V_{j}}$ to get updated feature vectors $\\vec{O_{j}}$."
+    "$\\vec{Q_{i}}$ contains information about whate each token is looking for. $\\vec{K_{j}}$ is about what information each token has. We calculate dot products between $\\vec{Q_{i}}$ and $\\vec{K_{j}}$ to figure out how closely related they are, and use them as weights to muliply our feature vectors, $\\vec{V_{j}}$ to get updated feature vectors $\\vec{O_{j}}$."
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
    "id": "fcb15fb4-4b54-46d7-8af1-ece8701be405",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "markdown",
-   "id": "a1b610e7-15b9-49a2-a225-d0a5837a0c31",
-   "metadata": {},
-   "source": [
-    "Using the words of our sequence as the indices,"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "68acfa7b-900d-4dd8-967b-0d99e236992d",
-   "metadata": {},
-   "source": [
-    "$O_{sky,1}$ = $Q_{sky}$,$K_{sky}$ similarity * $V_{sky,1}$ + \n",
-    "$Q_{sky}$,$K_{is}$ similarity * $V_{is,1}$ +\n",
-    "$Q_{sky}$,$K_{blue}$ similarity * $V_{blue,1}$"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "6c30fb18-1cf0-4955-8eb4-e37fec3c5863",
-   "metadata": {},
-   "source": [
-    "$O_{sky,2}$ = $Q_{sky}$,$K_{sky}$ similarity * $V_{sky,2}$ + \n",
-    "$Q_{sky}$,$K_{is}$ similarity * $V_{is,2}$ +\n",
-    "$Q_{sky}$,$K_{blue}$ similarity * $V_{blue,2}$"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "d0cd3337-c3ce-4075-86e3-e7dbd51c1125",
-   "metadata": {},
-   "source": [
-    "$O_{is,1}$ = $\\vec{Q_{is}}$,$\\vec{K_{sky}}$ similarity * $V_{sky,1}$ + \n",
-    "$\\vec{Q_{is}}$,$\\vec{K_{is}}$ similarity * $V_{is,1}$ +\n",
-    "$\\vec{Q_{is}}$,$\\vec{K_{blue}}$ similarity * $V_{blue,1}$"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "1a9cc69e-7c51-4d29-a230-5c96a768f67d",
-   "metadata": {},
-   "source": [
-    "$O_{is,2}$ = $\\vec{Q_{is}}$,$\\vec{K_{sky}}$ similarity * $V_{sky,2}$ + \n",
-    "$\\vec{Q_{is}}$,$\\vec{K_{is}}$ similarity * $V_{is,2}$ +\n",
-    "$\\vec{Q_{is}}$,$\\vec{K_{blue}}$ similarity * $V_{blue,2}$"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "7f6286ad-6e13-4dba-a376-127a10418b37",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "markdown",
-   "id": "38c84e9d-a114-4440-a0df-7b8a01e9ff20",
-   "metadata": {},
-   "source": [
-    "---\n",
-    "\n",
-    "[![Ask questions](https://img.shields.io/static/v1.svg?logo=star&label=❔&message=Ask%20Questions&color=9cf)](https://github.com/gihanpanapitiya/deep_learning/issues)  If you have any questions, please add an issue on GitHub. \n",
-    "\n",
-    "---"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "1dbdc51a-3f33-42b8-820e-d7a36caedb7f",
    "metadata": {},
    "outputs": [],
    "source": []
