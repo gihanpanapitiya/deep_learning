@@ -36,6 +36,22 @@
   },
   {
    "cell_type": "markdown",
+   "id": "d119281c-42f6-4361-8141-e7b7442eb51d",
+   "metadata": {},
+   "source": [
+    "#### Let's understand what happens in the self-attention mechanism"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8d20a6a2-d6f6-4a35-a037-51306db0df08",
+   "metadata": {},
+   "source": [
+    "The output of applying attention to a sequence of tokens is given by,"
+   ]
+  },
+  {
+   "cell_type": "markdown",
    "id": "cd1a78ad",
    "metadata": {},
    "source": [
@@ -47,12 +63,12 @@
    "id": "fa789f0d",
    "metadata": {},
    "source": [
-    "Let's suppose that we have a sentence of three words. For example 'sky is blue'. Let's  also assume that these three words are represented using three numbers, 1, 2 and 3. These are called tokens.  Therefore, our sequence of tokens is given by the following tensor. Tokenization is the process of breaking a sequence of characters into different parts. There are many tokenization methods. What I have done here is a very simple tokenization method for the sake of easliy explaining the concepts of the attention mechanism."
+    "Let's suppose that we have a sentence of three words. For example 'sky is blue'. Let's  also assume that these three words are represented using three numbers, 1, 2 and 3. These are called tokens.  Therefore, our sequence of tokens is given by the tensor, $[[1,2,3]]$. Tokenization is the process of breaking a sequence of characters into different parts. There are many tokenization methods. What I have done here is a very simple tokenization method for the sake of easliy explaining the concepts of the attention mechanism."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 28,
+   "execution_count": 2,
    "id": "cf8ce180",
    "metadata": {},
    "outputs": [],
@@ -62,7 +78,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 29,
+   "execution_count": 3,
    "id": "98d136b9-b6db-42ad-96c2-6f84d126b63d",
    "metadata": {},
    "outputs": [
@@ -72,7 +88,7 @@
        "tensor([[1, 2, 3]])"
       ]
      },
-     "execution_count": 29,
+     "execution_count": 3,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -114,7 +130,7 @@
     {
      "data": {
       "text/plain": [
-       "{1: [-1.072, -0.5001], 2: [-0.002, -0.4311], 3: [-0.002, -0.4311]}"
+       "{1: [-1.072, -0.5001], 2: [-0.012, -0.4311], 3: [-0.005, -0.5321]}"
       ]
      },
      "execution_count": 4,
@@ -123,7 +139,7 @@
     }
    ],
    "source": [
-    "embeddings = {1: [-1.0720, -0.5001], 2:  [-0.0020, -0.4311], 3: [-0.0020, -0.4311]}\n",
+    "embeddings = {1: [-1.0720, -0.5001], 2:  [-0.0120, -0.4311], 3: [-0.0050, -0.5321]}\n",
     "embeddings"
    ]
   },
@@ -142,7 +158,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "embedded_tokens = torch.tensor([[-1.0720, -0.5001], [-0.0020, -0.4311], [-0.0020, -0.4311] ])"
+    "embedded_tokens = torch.tensor([[-1.0720, -0.5001], [-0.0120, -0.4311], [-0.0050, -0.5321] ])"
    ]
   },
   {
@@ -155,8 +171,8 @@
      "data": {
       "text/plain": [
        "tensor([[-1.0720, -0.5001],\n",
-       "        [-0.0020, -0.4311],\n",
-       "        [-0.0020, -0.4311]])"
+       "        [-0.0120, -0.4311],\n",
+       "        [-0.0050, -0.5321]])"
       ]
      },
      "execution_count": 6,
@@ -189,7 +205,7 @@
    "id": "08aff325-6ca7-4d62-972a-7184c34cfce3",
    "metadata": {},
    "source": [
-    "let's cosinder the following WQ, WK and WV matrices"
+    "let's cosinder the following WQ, WK and WV matrices."
    ]
   },
   {
@@ -222,7 +238,7 @@
    "id": "4af20efa-8a2d-4305-b4eb-e2bc3c7b9653",
    "metadata": {},
    "source": [
-    "Now, let's transform our embedded tokens using the transformation matrices WQ, WK and WV."
+    "Now, let's transform our embedded tokens using the transformation matrices WQ, WK and WV to obtain Q, K, and V tensors respectively."
    ]
   },
   {
@@ -247,8 +263,8 @@
      "data": {
       "text/plain": [
        "tensor([[0.2261, 0.7422],\n",
-       "        [0.1699, 0.2857],\n",
-       "        [0.1699, 0.2857]], grad_fn=<MmBackward0>)"
+       "        [0.1702, 0.2896],\n",
+       "        [0.2098, 0.3536]], grad_fn=<MmBackward0>)"
       ]
      },
      "execution_count": 9,
@@ -270,8 +286,8 @@
      "data": {
       "text/plain": [
        "tensor([[ 0.4986, -0.5362],\n",
-       "        [ 0.0509,  0.0705],\n",
-       "        [ 0.0509,  0.0705]], grad_fn=<MmBackward0>)"
+       "        [ 0.0550,  0.0647],\n",
+       "        [ 0.0639,  0.0855]], grad_fn=<MmBackward0>)"
       ]
      },
      "execution_count": 10,
@@ -293,8 +309,8 @@
      "data": {
       "text/plain": [
        "tensor([[0.3048, 0.0934],\n",
-       "        [0.0742, 0.1921],\n",
-       "        [0.0742, 0.1921]], grad_fn=<MmBackward0>)"
+       "        [0.0763, 0.1909],\n",
+       "        [0.0921, 0.2368]], grad_fn=<MmBackward0>)"
       ]
      },
      "execution_count": 11,
@@ -307,22 +323,36 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": 12,
-   "id": "b4693965",
+   "cell_type": "markdown",
+   "id": "7250ac3a-7667-4374-9054-7f29d8e571c1",
    "metadata": {},
-   "outputs": [],
    "source": [
-    "d_k = Q.size()[-1]"
+    "What do Q,K and V represent? Well, their roles will become more apparent later. But for now, they can be considered as different feature matrices of our sequence, 'sky is blue'. This is because all we have done to obtain Q, K and V is to matrix multiply the token embeddings using three randomly initialized matrices."
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "2487593c-350e-4822-b775-de9da1ae450d",
+   "id": "966905fe-f1aa-4d9d-8844-ee53a912a7f1",
    "metadata": {},
    "outputs": [],
    "source": []
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9e8f6e05-6f46-45b5-ab53-a66a8fedfda4",
+   "metadata": {},
+   "source": [
+    "Below, I have written the Q, K, V matrices using their components to highlight what they contain."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e84d6987-8e82-448e-b23f-50abddd49283",
+   "metadata": {},
+   "source": [
+    "$Q$ can be considered as consisting of three feature vectors. One for each of the tokens in our sequence. That is, $\\vec{Q_{1}}$ is a feature vector for token $1$, or for the word $sky$. $\\vec{Q_{2}}$ is a feature vector for token $2$, or for the word $is$. $\\vec{Q_{3}}$ is a feature vector for token $3$, or for the word $blue$."
+   ]
   },
   {
    "cell_type": "markdown",
@@ -337,7 +367,15 @@
    "id": "97773379-37de-477f-b75a-973c03617aed",
    "metadata": {},
    "source": [
-    "$$ Q = \\begin{bmatrix} \\vec{Q_{1}} \\\\ \\vec{Q_{2}} \\end{bmatrix}$$"
+    "$$ Q = \\begin{bmatrix} \\vec{Q_{1}} \\\\ \\vec{Q_{2}} \\\\ \\vec{Q_{3}} \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fcb7ea30-3e2f-4ac0-b289-5d5b8369a915",
+   "metadata": {},
+   "source": [
+    "Similarly for the $K$ matrix. $\\vec{K_{1}}$ is a feature vector for token $1$, or for the word $sky$. $\\vec{K_{2}}$ is a feature vector for token $2$, or for the word $is$. $\\vec{K_{3}}$ is a feature vector for token $3$, or for the word $blue$."
    ]
   },
   {
@@ -353,7 +391,7 @@
    "id": "16658adc-c4d0-4c0d-b130-f1008f9865d7",
    "metadata": {},
    "source": [
-    "$$ K^{T} = \\begin{bmatrix} \\vec{K_{1}} \\\\ \\vec{K_{2}} \\end{bmatrix}$$"
+    "$$ K^{T} = \\begin{bmatrix} \\vec{K_{1}} \\\\ \\vec{K_{2}} \\\\ \\vec{K_{3}} \\end{bmatrix}$$"
    ]
   },
   {
@@ -374,6 +412,14 @@
   },
   {
    "cell_type": "markdown",
+   "id": "f2aa0726-5d59-45ac-850e-bdbac03635bf",
+   "metadata": {},
+   "source": [
+    "Similarly, $V$ is another feature matrix."
+   ]
+  },
+  {
+   "cell_type": "markdown",
    "id": "56bdba19-c34b-481e-9cf3-04c9292f07c2",
    "metadata": {},
    "source": [
@@ -382,10 +428,18 @@
   },
   {
    "cell_type": "markdown",
+   "id": "28c20358-96dc-48e3-acf6-3b8b7f39f6b2",
+   "metadata": {},
+   "source": [
+    "$$ V = \\begin{bmatrix} \\vec{V_{1}} \\\\ \\vec{V_{2}} \\\\ \\vec{V{3}} \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
    "id": "a7f2f239-ca78-4b0c-9aec-3ec0f65370c9",
    "metadata": {},
    "source": [
-    "Attention logits are given by $QK^{T}$"
+    "Attention logits in the attention mechanism are given as $QK^{T}$."
    ]
   },
   {
@@ -429,20 +483,36 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "id": "424af669-dfd9-4186-849d-22cf5f3c97a7",
+   "metadata": {},
+   "source": [
+    "What does this matrix gives us? Notice that the $1^{st}$ row of $QK^{T}$ consists of the dot products of $Q_{1}$ feature with respect to all the $K$ features. The value of the dot product indicates how similar two vectors are. Therefore, the $1^{st}$ row shows us how similar $Q_{1}$ feature to all the $K$ features. $2^{nd}$ row shows us how similar $Q_{2}$ feature to all the K features. 3rd row shows us how similar $Q_{3}$ feature to all the K features. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c8fd5141-5b1d-407b-b82d-28536b1407e1",
+   "metadata": {},
+   "source": [
+    "Let's obtain the attention logits using the actual values."
+   ]
+  },
+  {
    "cell_type": "code",
-   "execution_count": 30,
+   "execution_count": 12,
    "id": "03f96b33-4adc-48c0-983f-c47f3a67ac9b",
    "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "tensor([[-0.2853,  0.0638,  0.0638],\n",
-       "        [-0.0685,  0.0288,  0.0288],\n",
-       "        [-0.0685,  0.0288,  0.0288]], grad_fn=<MmBackward0>)"
+       "tensor([[-0.2853,  0.0604,  0.0779],\n",
+       "        [-0.0704,  0.0281,  0.0356],\n",
+       "        [-0.0850,  0.0344,  0.0436]], grad_fn=<MmBackward0>)"
       ]
      },
-     "execution_count": 30,
+     "execution_count": 12,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -453,28 +523,14 @@
    ]
   },
   {
+   "attachments": {},
    "cell_type": "markdown",
-   "id": "6e367763-2d13-4ea8-b427-56b67c2b8d3c",
+   "id": "788f8c16-6efc-4ac7-b214-b1396619a02e",
    "metadata": {},
    "source": [
-    "what is $\\vec{Q_{1}}$? It is a representation of the $1^{st}$ token. <br>\n",
-    "what is K1? It is another representation of the $1^{st}$ token. <br>"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "98fc0918-a73d-4b51-b731-4b7c469b706d",
-   "metadata": {},
-   "source": [
-    "Each element in the `attn_logits` matrix is a measure of how similar two $\\vec{Q}$ and $\\vec{K}$ vectors are."
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "1182962a-a37c-42b6-8ba5-660d07d1f658",
-   "metadata": {},
-   "source": [
-    "Each row of the `attn_logits` matrix shows how similar a query to all the keys. For example, row 1 is (similarity between Q1 and K1, similarity between Q1 and K2, similarity between Q1 and K3)."
+    "Again, each element in the `attn_logits` matrix is a measure of how similar two $\\vec{Q}$ and $\\vec{K}$ vectors are.\n",
+    "\n",
+    "Each row of the `attn_logits` matrix shows how similar a query to all the keys. For example, row 1 is => (similarity between Q1 and K1, similarity between Q1 and K2, similarity between Q1 and K3)."
    ]
   },
   {
@@ -491,6 +547,16 @@
    "metadata": {},
    "source": [
     "The next step is scaling the `attention_logits` matrix with the scaling factor, $\\sqrt(d_{k}$.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "b4693965",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "d_k = Q.size()[-1]"
    ]
   },
   {
@@ -511,7 +577,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 31,
+   "execution_count": 14,
    "id": "28f7d892-414f-4d6a-b189-c380fb49c5ca",
    "metadata": {},
    "outputs": [],
@@ -521,19 +587,19 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 32,
+   "execution_count": 15,
    "id": "61cc140c-e29b-4449-9ffb-1eda8a23c0f5",
    "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "tensor([[-0.2017,  0.0451,  0.0451],\n",
-       "        [-0.0484,  0.0204,  0.0204],\n",
-       "        [-0.0484,  0.0204,  0.0204]], grad_fn=<DivBackward0>)"
+       "tensor([[-0.2017,  0.0427,  0.0551],\n",
+       "        [-0.0498,  0.0199,  0.0252],\n",
+       "        [-0.0601,  0.0243,  0.0309]], grad_fn=<DivBackward0>)"
       ]
      },
-     "execution_count": 32,
+     "execution_count": 15,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -568,7 +634,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 34,
+   "execution_count": 16,
    "id": "0fd5a91f-5c31-4661-8717-1cdd3e1671cc",
    "metadata": {},
    "outputs": [],
@@ -578,19 +644,19 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 35,
+   "execution_count": 17,
    "id": "61cb7e78-2659-4051-84c9-8c5423792360",
    "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "tensor([[0.2809, 0.3595, 0.3595],\n",
-       "        [0.3182, 0.3409, 0.3409],\n",
-       "        [0.3182, 0.3409, 0.3409]], grad_fn=<SoftmaxBackward0>)"
+       "tensor([[0.2801, 0.3577, 0.3622],\n",
+       "        [0.3175, 0.3404, 0.3422],\n",
+       "        [0.3141, 0.3418, 0.3441]], grad_fn=<SoftmaxBackward0>)"
       ]
      },
-     "execution_count": 35,
+     "execution_count": 17,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -609,74 +675,33 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 36,
-   "id": "fadaa733-3243-4fd9-96e1-2c9dd87b2e72",
+   "execution_count": 18,
+   "id": "e20f93e6-680c-4a83-bb39-6adf5dcd6976",
    "metadata": {},
    "outputs": [
     {
-     "data": {
-      "text/plain": [
-       "tensor(1., grad_fn=<SumBackward0>)"
-      ]
-     },
-     "execution_count": 36,
-     "metadata": {},
-     "output_type": "execute_result"
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "tensor(1., grad_fn=<SumBackward0>)\n",
+      "tensor(1., grad_fn=<SumBackward0>)\n",
+      "tensor(1.0000, grad_fn=<SumBackward0>)\n"
+     ]
     }
    ],
    "source": [
-    "attention_weights[0].sum()"
+    "print(attention_weights[0].sum())\n",
+    "print(attention_weights[1].sum())\n",
+    "print(attention_weights[2].sum())"
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": 37,
-   "id": "88e27a7d-731b-41a2-8131-0ba7d38e3dfe",
+   "cell_type": "markdown",
+   "id": "f73de8bd-09cf-4edd-b893-ee44a51ca1d0",
    "metadata": {},
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "tensor(1., grad_fn=<SumBackward0>)"
-      ]
-     },
-     "execution_count": 37,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
    "source": [
-    "attention_weights[1].sum()"
+    "Therefore, each element in a given row can be considered as normalized weight values."
    ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 38,
-   "id": "541bcdd1-9ada-4c84-8f94-5047f7fac678",
-   "metadata": {},
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "tensor(1., grad_fn=<SumBackward0>)"
-      ]
-     },
-     "execution_count": 38,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "attention_weights[2].sum()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "98a73461-0d80-47a4-a860-928377bf4800",
-   "metadata": {},
-   "outputs": [],
-   "source": []
   },
   {
    "cell_type": "code",
@@ -687,39 +712,8 @@
    "source": []
   },
   {
-   "cell_type": "code",
-   "execution_count": 22,
-   "id": "9af3135b-4a41-47cf-b1e7-970dc33d9907",
-   "metadata": {},
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "tensor([[0.1390, 0.1644],\n",
-       "        [0.1476, 0.1607],\n",
-       "        [0.1476, 0.1607]], grad_fn=<MmBackward0>)"
-      ]
-     },
-     "execution_count": 22,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "attention_weights @ V"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "6ac6fedd-047e-4a06-99d0-c970c467dee9",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
    "cell_type": "markdown",
-   "id": "2eeb5be6-c62f-41d1-a150-7cb55998d07b",
+   "id": "d34ac2d5-0e68-436f-b2bf-758291998ae1",
    "metadata": {},
    "source": [
     "output values"
@@ -727,39 +721,172 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 23,
-   "id": "6e23898a-08f7-41e4-9b6e-fc925ff0d594",
+   "execution_count": 19,
+   "id": "9af3135b-4a41-47cf-b1e7-970dc33d9907",
    "metadata": {},
    "outputs": [
     {
-     "data": {
-      "text/plain": [
-       "tensor([[0.1390, 0.1644],\n",
-       "        [0.1476, 0.1607],\n",
-       "        [0.1476, 0.1607]], grad_fn=<MmBackward0>)"
-      ]
-     },
-     "execution_count": 23,
-     "metadata": {},
-     "output_type": "execute_result"
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "tensor([[0.1460, 0.1802],\n",
+      "        [0.1543, 0.1757],\n",
+      "        [0.1535, 0.1761]], grad_fn=<MmBackward0>)\n"
+     ]
     }
    ],
    "source": [
-    "torch.matmul(attention_weights, V)"
+    "O = attention_weights @ V\n",
+    "\n",
+    "print(O)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b56f6bec-ed0c-4713-8f9d-9c8739ea8944",
+   "metadata": {},
+   "source": [
+    "$$ O = \\begin{bmatrix} O_{1,1} & O_{1,2} \\\\ O_{2,1} & O_{2,2}  \\\\ O_{3,1} & O_{3,2} \\end{bmatrix}$$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "604c6f37-c00f-40af-b602-386399b09a65",
+   "metadata": {},
+   "source": [
+    "let's try to understand the meaning of the output values."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "362e10b0-4f34-4148-ab0e-96a427dd6502",
+   "metadata": {},
+   "source": [
+    "Below is how we obtained the $O_{1,1}$ output values matrix."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2f9778db-39ea-4994-84ca-317e7f000aa4",
+   "metadata": {},
+   "source": [
+    "$O_{1,1}$ = $\\vec{Q_{1}}$,$\\vec{K_{1}}$ similarity * $V_{1,1}$ + \n",
+    "$\\vec{Q_{1}}$,$\\vec{K_{2}}$ similarity * $V_{2,1}$ +\n",
+    "$\\vec{Q_{1}}$,$\\vec{K_{3}}$ similarity * $V_{3,1}$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "297333d2-43a1-4613-9207-8e7a80719c42",
+   "metadata": {},
+   "source": [
+    "$O_{1,2}$ = $\\vec{Q_{1}}$,$\\vec{K_{1}}$ similarity * $V_{1,2}$ + \n",
+    "$\\vec{Q_{1}}$,$\\vec{K_{2}}$ similarity * $V_{2,2}$ +\n",
+    "$\\vec{Q_{1}}$,$\\vec{K_{3}}$ similarity * $V_{3,2}$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7dae8bfd-dd4a-4f14-88cb-8c83e0c153e0",
+   "metadata": {},
+   "source": [
+    "$O_{2,1}$ = $\\vec{Q_{2}}$,$\\vec{K_{1}}$ similarity * $V_{1,1}$ + \n",
+    "$\\vec{Q_{2}}$,$\\vec{K_{K}}$ similarity * $V_{2,1}$ +\n",
+    "$\\vec{Q_{3}}$,$\\vec{K_{3}}$ similarity * $V_{3,1}$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bdf7e8ed-45a4-4523-9dd5-7b6b30b54a11",
+   "metadata": {},
+   "source": [
+    "$O_{2,2}$ = $\\vec{Q_{2}}$,$\\vec{K_{1}}$ similarity * $V_{1,2}$ + \n",
+    "$\\vec{Q_{2}}$,$\\vec{K_{2}}$ similarity * $V_{2,2}$ +\n",
+    "$\\vec{Q_{2}}$,$\\vec{K_{3}}$ similarity * $V_{3,2}$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "964070a8-7aca-4d30-b20b-b227ef6be988",
+   "metadata": {},
+   "source": [
+    "Think of this as obtaining a weighted feature values. $\\vec{Q_{i}}.\\vec{K_{j}}$ are the weights. $V_{j}$ are the input features. $O_{j}$ are the output features."
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "637f8d3c-de6a-47e7-aa86-23b6518d1623",
+   "id": "05a2bffa-4fac-4e73-9e41-9fab137604ee",
    "metadata": {},
    "outputs": [],
    "source": []
   },
   {
+   "cell_type": "markdown",
+   "id": "e042a9fc-6519-4d97-8790-ca98558b2c46",
+   "metadata": {},
+   "source": [
+    "Let's try to demistify this further."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8d6754b7-7967-45fa-b777-6697632659a1",
+   "metadata": {},
+   "source": [
+    "$O_{1,1}$ = ($\\vec{Q_{1}}$,$\\vec{K_{1}}$ similarity $\\times$ $1^{st}$ feature of token 1) + \n",
+    "($\\vec{Q_{1}}$,$\\vec{K_{2}}$ similarity $\\times$ $1^{st}$ feature of token 2) +\n",
+    "($\\vec{Q_{1}}$,$\\vec{K_{3}}$ similarity $\\times$ $1^{st}$ feature of token 3)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f39b9865-e22d-4cf9-8d06-5e0095cad7ee",
+   "metadata": {},
+   "source": [
+    "$O_{2,1}$ = ($\\vec{Q_{2}}$,$\\vec{K_{1}}$ similarity $\\times$ $1^{st}$ feature of token 1) + \n",
+    "($\\vec{Q_{2}}$,$\\vec{K_{2}}$ similarity $\\times$ $1^{st}$ feature of token 2) +\n",
+    "($\\vec{Q_{2}}$,$\\vec{K_{3}}$ similarity $\\times$ $1^{st}$ feature of token 3)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5d04f91d-e508-4699-864f-f2c261a828af",
+   "metadata": {},
+   "source": [
+    "Notice that the index of the token is equal to the index of the Key in each \"$\\vec{Q}$, $\\vec{K}$ $\\times$ feature token\" part above."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "79a383df-2275-418f-b56a-18303295143c",
+   "metadata": {},
+   "source": [
+    "We get large values for elements in $\\vec{O_{1}}$, when any of $\\vec{K_{1}}$, $\\vec{K_{2}}$, or $\\vec{K_{3}}$ has a large dot product with $\\vec{Q_{1}}$.\n",
+    "\n",
+    "We get large values for elements in $\\vec{O_{2}}$, when any of $\\vec{K_{1}}$, $\\vec{K_{2}}$, or $\\vec{K_{3}}$ has a large dot product with $\\vec{Q_{2}}$."
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": null,
-   "id": "b95d4f80-d82d-4b94-add9-3429603edf6f",
+   "id": "db3996c9-a64b-4678-a956-a7d8d49bb179",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d44828b4-5973-4da4-aaff-7997671f1c09",
+   "metadata": {},
+   "source": [
+    "$\\vec{Q_{i}}$ can be thought of as containing information about what each token is looking for. $\\vec{K_{j}}$ is about what information each token has. We calculate dot products between $\\vec{Q_{i}}$ and $\\vec{K_{j}}$ to figure out how closely related they are, and use them as weights to muliply our feature vectors, $\\vec{V_{j}}$ to get updated feature vectors $\\vec{O_{j}}$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fcb15fb4-4b54-46d7-8af1-ece8701be405",
    "metadata": {},
    "outputs": [],
    "source": []

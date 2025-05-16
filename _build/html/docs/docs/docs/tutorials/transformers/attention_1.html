@@ -100,8 +100,12 @@
 <p>This is how attetion is described in the <a class="reference external" href="https://arxiv.org/abs/1706.03762">Attention is All You Need</a> paper.</p>
 <p>“An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors. The output is computed as a weighted sum of the values, where the weight assigned to each value is computed by a compatibility function of the query with the corresponding key.”</p>
 <p>– Attention Is All You Need, Vaswani et. al.</p>
+<section id="Let's-understand-what-happens-in-the-self-attention-mechanism">
+<h2>Let’s understand what happens in the self-attention mechanism<a class="headerlink" href="#Let's-understand-what-happens-in-the-self-attention-mechanism" title="Link to this heading"></a></h2>
+<p>The output of applying attention to a sequence of tokens is given by,</p>
 <p><span class="math notranslate nohighlight">\(Attention(Q,K,V) = softmax( \frac{QK^{T}} {\sqrt{d_{k}}} )V\)</span></p>
-<p>Let’s consider a single sequence of three tokens. This sequence can represent a senetence. For example, something like ‘sky is blue’. The three tokens are 1,2 and 3.</p>
+<p>Let’s suppose that we have a sentence of three words. For example ‘sky is blue’. Let’s also assume that these three words are represented using three numbers, 1, 2 and 3. These are called tokens. Therefore, our sequence of tokens is given by the tensor, <span class="math notranslate nohighlight">\([[1,2,3]]\)</span>. Tokenization is the process of breaking a sequence of characters into different parts. There are many tokenization methods. What I have done here is a very simple tokenization method for the sake of easliy explaining the
+concepts of the attention mechanism.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -127,12 +131,14 @@
 tensor([[1, 2, 3]])
 </pre></div></div>
 </div>
+<p>In this case, our <code class="docutils literal notranslate"><span class="pre">sequence</span> <span class="pre">length</span></code> is 3.</p>
+<p>Tokenization alone is not enough to create a information-rich representation of a character sequence. We will have to come up with a vector representation for each token. These are called embeddings.</p>
 <p>let’s assume that the embedding vectors of 1,2 and 3 are as follows.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.0720</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5001</span><span class="p">],</span> <span class="mi">2</span><span class="p">:</span>  <span class="p">[</span><span class="o">-</span><span class="mf">0.0020</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">],</span> <span class="mi">3</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0020</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">]}</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embeddings</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.0720</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5001</span><span class="p">],</span> <span class="mi">2</span><span class="p">:</span>  <span class="p">[</span><span class="o">-</span><span class="mf">0.0120</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">],</span> <span class="mi">3</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0050</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5321</span><span class="p">]}</span>
 <span class="n">embeddings</span>
 </pre></div>
 </div>
@@ -143,7 +149,7 @@ tensor([[1, 2, 3]])
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{1: [-1.072, -0.5001], 2: [-0.002, -0.4311], 3: [-0.002, -0.4311]}
+{1: [-1.072, -0.5001], 2: [-0.012, -0.4311], 3: [-0.005, -0.5321]}
 </pre></div></div>
 </div>
 <p>Therefore, our embedded tokens are,</p>
@@ -151,7 +157,7 @@ tensor([[1, 2, 3]])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embedded_tokens</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.0720</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5001</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0020</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0020</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">]</span> <span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embedded_tokens</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.0720</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5001</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0120</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4311</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0050</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5321</span><span class="p">]</span> <span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -170,8 +176,8 @@ tensor([[1, 2, 3]])
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 tensor([[-1.0720, -0.5001],
-        [-0.0020, -0.4311],
-        [-0.0020, -0.4311]])
+        [-0.0120, -0.4311],
+        [-0.0050, -0.5321]])
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -183,7 +189,7 @@ tensor([[-1.0720, -0.5001],
 </div>
 </div>
 <p>As the next step, let’s create the Q,K,V matrices. This is done by transforming our embedding matrix using three weight vectors. WQ, WK and WV.</p>
-<p>let’s cosinder the following WQ, WK and WV matrices</p>
+<p>let’s cosinder the following WQ, WK and WV matrices.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -207,7 +213,7 @@ tensor([[-1.0720, -0.5001],
 </pre></div>
 </div>
 </div>
-<p>Now, let’s transform our embedded tokens using the transformation matrices WQ, WK and WV.</p>
+<p>Now, let’s transform our embedded tokens using the transformation matrices WQ, WK and WV to obtain Q, K, and V tensors respectively.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
@@ -233,8 +239,8 @@ tensor([[-1.0720, -0.5001],
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 tensor([[0.2261, 0.7422],
-        [0.1699, 0.2857],
-        [0.1699, 0.2857]], grad_fn=&lt;MmBackward0&gt;)
+        [0.1702, 0.2896],
+        [0.2098, 0.3536]], grad_fn=&lt;MmBackward0&gt;)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -252,8 +258,8 @@ tensor([[0.2261, 0.7422],
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 tensor([[ 0.4986, -0.5362],
-        [ 0.0509,  0.0705],
-        [ 0.0509,  0.0705]], grad_fn=&lt;MmBackward0&gt;)
+        [ 0.0550,  0.0647],
+        [ 0.0639,  0.0855]], grad_fn=&lt;MmBackward0&gt;)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -271,18 +277,11 @@ tensor([[ 0.4986, -0.5362],
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 tensor([[0.3048, 0.0934],
-        [0.0742, 0.1921],
-        [0.0742, 0.1921]], grad_fn=&lt;MmBackward0&gt;)
+        [0.0763, 0.1909],
+        [0.0921, 0.2368]], grad_fn=&lt;MmBackward0&gt;)
 </pre></div></div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d_k</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
+<p>What do Q,K and V represent? Well, their roles will become more apparent later. But for now, they can be considered as different feature matrices of our sequence, ‘sky is blue’. This is because all we have done to obtain Q, K and V is to matrix multiply the token embeddings using three randomly initialized matrices.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -291,19 +290,25 @@ tensor([[0.3048, 0.0934],
 </pre></div>
 </div>
 </div>
+<p>Below, I have written the Q, K, V matrices using their components to highlight what they contain.</p>
+<p><span class="math notranslate nohighlight">\(Q\)</span> can be considered as consisting of three feature vectors. One for each of the tokens in our sequence. That is, <span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span> is a feature vector for token <span class="math notranslate nohighlight">\(1\)</span>, or for the word <span class="math notranslate nohighlight">\(sky\)</span>. <span class="math notranslate nohighlight">\(\vec{Q_{2}}\)</span> is a feature vector for token <span class="math notranslate nohighlight">\(2\)</span>, or for the word <span class="math notranslate nohighlight">\(is\)</span>. <span class="math notranslate nohighlight">\(\vec{Q_{3}}\)</span> is a feature vector for token <span class="math notranslate nohighlight">\(3\)</span>, or for the word <span class="math notranslate nohighlight">\(blue\)</span>.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}Q = \begin{bmatrix} Q_{1,1} &amp; Q_{1,2} \\ Q_{2,1} &amp; Q_{2,2} \\ Q_{3,1} &amp; Q_{3,2} \end{bmatrix}\end{split}\]</div>
 <div class="math notranslate nohighlight">
-\[\begin{split}Q = \begin{bmatrix} \vec{Q_{1}} \\ \vec{Q_{2}} \end{bmatrix}\end{split}\]</div>
+\[\begin{split}Q = \begin{bmatrix} \vec{Q_{1}} \\ \vec{Q_{2}} \\ \vec{Q_{3}} \end{bmatrix}\end{split}\]</div>
+<p>Similarly for the <span class="math notranslate nohighlight">\(K\)</span> matrix. <span class="math notranslate nohighlight">\(\vec{K_{1}}\)</span> is a feature vector for token <span class="math notranslate nohighlight">\(1\)</span>, or for the word <span class="math notranslate nohighlight">\(sky\)</span>. <span class="math notranslate nohighlight">\(\vec{K_{2}}\)</span> is a feature vector for token <span class="math notranslate nohighlight">\(2\)</span>, or for the word <span class="math notranslate nohighlight">\(is\)</span>. <span class="math notranslate nohighlight">\(\vec{K_{3}}\)</span> is a feature vector for token <span class="math notranslate nohighlight">\(3\)</span>, or for the word <span class="math notranslate nohighlight">\(blue\)</span>.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}K = \begin{bmatrix} K_{1,1} &amp; K_{1,2} \\ K_{2,1} &amp; K_{2,2} \\ K_{3,1} &amp; K_{3,2} \end{bmatrix}\end{split}\]</div>
 <div class="math notranslate nohighlight">
-\[\begin{split}K^{T} = \begin{bmatrix} \vec{K_{1}} \\ \vec{K_{2}} \end{bmatrix}\end{split}\]</div>
+\[\begin{split}K^{T} = \begin{bmatrix} \vec{K_{1}} \\ \vec{K_{2}} \\ \vec{K_{3}} \end{bmatrix}\end{split}\]</div>
 <div class="math notranslate nohighlight">
 \[\begin{split}K^{T} = \begin{bmatrix} K_{1,1} &amp; K_{2,1} \\ K_{1,2} &amp; K_{2,2} \\ K_{1,3} &amp; K_{2,3} \end{bmatrix}\end{split}\]</div>
-<!-- $$ K = \begin{bmatrix} \vec{K_{1}} \\ \vec{K_{2}} \\ \vec{K_{3}} \end{bmatrix}$$ --><div class="math notranslate nohighlight">
+<!-- $$ K = \begin{bmatrix} \vec{K_{1}} \\ \vec{K_{2}} \\ \vec{K_{3}} \end{bmatrix}$$ --><p>Similarly, <span class="math notranslate nohighlight">\(V\)</span> is another feature matrix.</p>
+<div class="math notranslate nohighlight">
 \[\begin{split}V = \begin{bmatrix} V_{1,1} &amp; V_{1,2} \\ V_{2,1} &amp; V_{2,2}  \\ V_{3,1} &amp; V_{3,2} \end{bmatrix}\end{split}\]</div>
-<p>Attention logits are given by <span class="math notranslate nohighlight">\(QK^{T}\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}V = \begin{bmatrix} \vec{V_{1}} \\ \vec{V_{2}} \\ \vec{V{3}} \end{bmatrix}\end{split}\]</div>
+<p>Attention logits in the attention mechanism are given as <span class="math notranslate nohighlight">\(QK^{T}\)</span>.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split} QK^{T} = \begin{bmatrix} Q_{1,1}\times K_{1,1} + Q_{1,2}\times K_{1,2} &amp;
 Q_{1,1}\times K_{2,1} + Q_{1,2}\times K_{2,2} &amp;
@@ -314,6 +319,7 @@ Q_{2,1}\times K_{3,1} + Q_{2,2}\times K_{3,2} \\
 Q_{3,1}\times K_{1,1} + Q_{3,2}\times K_{1,2} &amp;
 Q_{3,1}\times K_{2,1} + Q_{3,2}\times K_{2,2} &amp;
 Q_{3,1}\times K_{3,1} + Q_{3,2}\times K_{3,2} \end{bmatrix}\end{split}\]</div>
+<p>Equivalently,</p>
 <div class="math notranslate nohighlight">
 \[\begin{split} QK^{T} = \begin{bmatrix} \vec{Q_{1}}\cdot \vec{K_{1}} &amp;
 \vec{Q_{1}}\cdot \vec{K_{2}} &amp;
@@ -324,8 +330,11 @@ Q_{3,1}\times K_{3,1} + Q_{3,2}\times K_{3,2} \end{bmatrix}\end{split}\]</div>
 \vec{Q_{3}}\cdot \vec{K_{1}} &amp;
 \vec{Q_{3}}\cdot \vec{K_{2}} &amp;
 \vec{Q_{3}}\cdot \vec{K_{3}} \end{bmatrix}\end{split}\]</div>
+<p>What does this matrix gives us? Notice that the <span class="math notranslate nohighlight">\(1^{st}\)</span> row of <span class="math notranslate nohighlight">\(QK^{T}\)</span> consists of the dot products of <span class="math notranslate nohighlight">\(Q_{1}\)</span> feature with respect to all the <span class="math notranslate nohighlight">\(K\)</span> features. The value of the dot product indicates how similar two vectors are. Therefore, the <span class="math notranslate nohighlight">\(1^{st}\)</span> row shows us how similar <span class="math notranslate nohighlight">\(Q_{1}\)</span> feature to all the <span class="math notranslate nohighlight">\(K\)</span> features. <span class="math notranslate nohighlight">\(2^{nd}\)</span> row shows us how similar <span class="math notranslate nohighlight">\(Q_{2}\)</span> feature to all the K features. 3rd row shows us how similar <span class="math notranslate nohighlight">\(Q_{3}\)</span> feature to
+all the K features.</p>
+<p>Let’s obtain the attention logits using the actual values.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attn_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">K</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
@@ -334,26 +343,35 @@ Q_{3,1}\times K_{3,1} + Q_{3,2}\times K_{3,2} \end{bmatrix}\end{split}\]</div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-tensor([[-0.2853,  0.0638,  0.0638],
-        [-0.0685,  0.0288,  0.0288],
-        [-0.0685,  0.0288,  0.0288]], grad_fn=&lt;MmBackward0&gt;)
+tensor([[-0.2853,  0.0604,  0.0779],
+        [-0.0704,  0.0281,  0.0356],
+        [-0.0850,  0.0344,  0.0436]], grad_fn=&lt;MmBackward0&gt;)
 </pre></div></div>
 </div>
+<p>Again, each element in the <code class="docutils literal notranslate"><span class="pre">attn_logits</span></code> matrix is a measure of how similar two <span class="math notranslate nohighlight">\(\vec{Q}\)</span> and <span class="math notranslate nohighlight">\(\vec{K}\)</span> vectors are.</p>
+<p>Each row of the <code class="docutils literal notranslate"><span class="pre">attn_logits</span></code> matrix shows how similar a query to all the keys. For example, row 1 is =&gt; (similarity between Q1 and K1, similarity between Q1 and K2, similarity between Q1 and K3).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># torch.matmul(Q, K.transpose(-2, -1))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>
-<p>what is <span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>? It is a representation of 1st sentence part. what is K1? It is another representation of 1st sentence part.</p>
-<p>Each row of the attention matrix (softmax(QKTQK T)) contains weights representing how much a query (e.g., a word) “pays attention” to all other keys (words) in the sequence.</p>
+<p>The next step is scaling the <code class="docutils literal notranslate"><span class="pre">attention_logits</span></code> matrix with the scaling factor, <span class="math notranslate nohighlight">\(\sqrt(d_{k}\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d_k</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
 <div class="math notranslate nohighlight">
 \[\begin{split} QK^{T}/\sqrt(d_{k}) = \begin{bmatrix} \frac{\vec{Q_{1}}\cdot \vec{K_{1}}}{\sqrt(d_{k})} &amp;
 \frac{\vec{Q_{1}}\cdot \vec{K_{2}}}{ \sqrt(d_{k}) } &amp;
@@ -365,7 +383,7 @@ tensor([[-0.2853,  0.0638,  0.0638],
 \frac{\vec{Q_{3}}\cdot \vec{K_{2}}}{ \sqrt(d_{k}) } &amp;
 \frac{\vec{Q_{3}}\cdot \vec{K_{3}}}{ \sqrt(d_{k}) } \end{bmatrix}\end{split}\]</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scaled_attention_logits</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">K</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_k</span><span class="p">)</span>
@@ -373,7 +391,7 @@ tensor([[-0.2853,  0.0638,  0.0638],
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scaled_attention_logits</span>
@@ -381,16 +399,17 @@ tensor([[-0.2853,  0.0638,  0.0638],
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-tensor([[-0.2017,  0.0451,  0.0451],
-        [-0.0484,  0.0204,  0.0204],
-        [-0.0484,  0.0204,  0.0204]], grad_fn=&lt;DivBackward0&gt;)
+tensor([[-0.2017,  0.0427,  0.0551],
+        [-0.0498,  0.0199,  0.0252],
+        [-0.0601,  0.0243,  0.0309]], grad_fn=&lt;DivBackward0&gt;)
 </pre></div></div>
 </div>
+<p>Finally, we apply the softmax operation to each row. This normalizes the values of each row so that the sum of these values is 1.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split} softmax(QK^{T}/\sqrt(d_{k})) = \begin{bmatrix} \frac{exp({\frac{\vec{Q_{1}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) }{ exp({\frac{\vec{Q_{1}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{1}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{1}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}})} &amp;
 \frac{exp(\frac{\vec{Q_{1}}\cdot \vec{K_{2}}}{ \sqrt(d_{k}) })}{ exp({\frac{\vec{Q_{1}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{1}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{1}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}})  } &amp;
@@ -402,7 +421,7 @@ tensor([[-0.2017,  0.0451,  0.0451],
 \frac{exp(\frac{\vec{Q_{3}}\cdot \vec{K_{2}}}{ \sqrt(d_{k}) })}{ exp({\frac{\vec{Q_{3}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{3}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{3}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}}) } &amp;
 \frac{exp(\frac{\vec{Q_{3}}\cdot \vec{K_{3}}}{ \sqrt(d_{k}) })}{ exp({\frac{\vec{Q_{3}}\cdot \vec{K_{1}}}{\sqrt(d_{k})}}) + exp({\frac{\vec{Q_{3}}\cdot \vec{K_{2}}}{\sqrt(d_{k})}}) + \exp({\frac{\vec{Q_{3}}\cdot \vec{K_{3}}}{\sqrt(d_{k})}})  } \end{bmatrix}\end{split}\]</div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">scaled_attention_logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
@@ -410,7 +429,7 @@ tensor([[-0.2017,  0.0451,  0.0451],
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span>
@@ -418,95 +437,38 @@ tensor([[-0.2017,  0.0451,  0.0451],
 </div>
 </div>
 <div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tensor([[0.2801, 0.3577, 0.3622],
+        [0.3175, 0.3404, 0.3422],
+        [0.3141, 0.3418, 0.3441]], grad_fn=&lt;SoftmaxBackward0&gt;)
+</pre></div></div>
+</div>
+<p>Note that values in each row add up to 1.</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-tensor([[0.2809, 0.3595, 0.3595],
-        [0.3182, 0.3409, 0.3409],
-        [0.3182, 0.3409, 0.3409]], grad_fn=&lt;SoftmaxBackward0&gt;)
-</pre></div></div>
-</div>
-<p>you can see that values in each row add up to 1.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">attention_weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">attention_weights</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">attention_weights</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 tensor(1., grad_fn=&lt;SumBackward0&gt;)
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
 tensor(1., grad_fn=&lt;SumBackward0&gt;)
+tensor(1.0000, grad_fn=&lt;SumBackward0&gt;)
 </pre></div></div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-tensor(1., grad_fn=&lt;SumBackward0&gt;)
-</pre></div></div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attention_weights</span> <span class="o">@</span> <span class="n">V</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-tensor([[0.1390, 0.1644],
-        [0.1476, 0.1607],
-        [0.1476, 0.1607]], grad_fn=&lt;MmBackward0&gt;)
-</pre></div></div>
-</div>
+<p>Therefore, each element in a given row can be considered as normalized weight values.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -517,24 +479,34 @@ tensor([[0.1390, 0.1644],
 </div>
 <p>output values</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">attention_weights</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">O</span> <span class="o">=</span> <span class="n">attention_weights</span> <span class="o">@</span> <span class="n">V</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">O</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-tensor([[0.1390, 0.1644],
-        [0.1476, 0.1607],
-        [0.1476, 0.1607]], grad_fn=&lt;MmBackward0&gt;)
+tensor([[0.1460, 0.1802],
+        [0.1543, 0.1757],
+        [0.1535, 0.1761]], grad_fn=&lt;MmBackward0&gt;)
 </pre></div></div>
 </div>
+<div class="math notranslate nohighlight">
+\[\begin{split}O = \begin{bmatrix} O_{1,1} &amp; O_{1,2} \\ O_{2,1} &amp; O_{2,2}  \\ O_{3,1} &amp; O_{3,2} \end{bmatrix}\end{split}\]</div>
+<p>let’s try to understand the meaning of the output values.</p>
+<p>Below is how we obtained the <span class="math notranslate nohighlight">\(O_{1,1}\)</span> output values matrix.</p>
+<p><span class="math notranslate nohighlight">\(O_{1,1}\)</span> = <span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{1}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{1,1}\)</span> + <span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{2}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{2,1}\)</span> + <span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{3}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{3,1}\)</span></p>
+<p><span class="math notranslate nohighlight">\(O_{1,2}\)</span> = <span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{1}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{1,2}\)</span> + <span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{2}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{2,2}\)</span> + <span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{3}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{3,2}\)</span></p>
+<p><span class="math notranslate nohighlight">\(O_{2,1}\)</span> = <span class="math notranslate nohighlight">\(\vec{Q_{2}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{1}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{1,1}\)</span> + <span class="math notranslate nohighlight">\(\vec{Q_{2}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{K}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{2,1}\)</span> + <span class="math notranslate nohighlight">\(\vec{Q_{3}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{3}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{3,1}\)</span></p>
+<p><span class="math notranslate nohighlight">\(O_{2,2}\)</span> = <span class="math notranslate nohighlight">\(\vec{Q_{2}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{1}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{1,2}\)</span> + <span class="math notranslate nohighlight">\(\vec{Q_{2}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{2}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{2,2}\)</span> + <span class="math notranslate nohighlight">\(\vec{Q_{2}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{3}}\)</span> similarity * <span class="math notranslate nohighlight">\(V_{3,2}\)</span></p>
+<p>Think of this as obtaining a weighted feature values. <span class="math notranslate nohighlight">\(\vec{Q_{i}}.\vec{K_{j}}\)</span> are the weights. <span class="math notranslate nohighlight">\(V_{j}\)</span> are the input features. <span class="math notranslate nohighlight">\(O_{j}\)</span> are the output features.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -543,6 +515,12 @@ tensor([[0.1390, 0.1644],
 </pre></div>
 </div>
 </div>
+<p>Let’s try to demistify this further.</p>
+<p><span class="math notranslate nohighlight">\(O_{1,1}\)</span> = (<span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{1}}\)</span> similarity <span class="math notranslate nohighlight">\(\times\)</span> <span class="math notranslate nohighlight">\(1^{st}\)</span> feature of token 1) + (<span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{2}}\)</span> similarity <span class="math notranslate nohighlight">\(\times\)</span> <span class="math notranslate nohighlight">\(1^{st}\)</span> feature of token 2) + (<span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{3}}\)</span> similarity <span class="math notranslate nohighlight">\(\times\)</span> <span class="math notranslate nohighlight">\(1^{st}\)</span> feature of token 3)</p>
+<p><span class="math notranslate nohighlight">\(O_{2,1}\)</span> = (<span class="math notranslate nohighlight">\(\vec{Q_{2}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{1}}\)</span> similarity <span class="math notranslate nohighlight">\(\times\)</span> <span class="math notranslate nohighlight">\(1^{st}\)</span> feature of token 1) + (<span class="math notranslate nohighlight">\(\vec{Q_{2}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{2}}\)</span> similarity <span class="math notranslate nohighlight">\(\times\)</span> <span class="math notranslate nohighlight">\(1^{st}\)</span> feature of token 2) + (<span class="math notranslate nohighlight">\(\vec{Q_{2}}\)</span>,<span class="math notranslate nohighlight">\(\vec{K_{3}}\)</span> similarity <span class="math notranslate nohighlight">\(\times\)</span> <span class="math notranslate nohighlight">\(1^{st}\)</span> feature of token 3)</p>
+<p>Notice that the index of the token is equal to the index of the Key in each “<span class="math notranslate nohighlight">\(\vec{Q}\)</span>, <span class="math notranslate nohighlight">\(\vec{K}\)</span> <span class="math notranslate nohighlight">\(\times\)</span> feature token” part above.</p>
+<p>We get large values for elements in <span class="math notranslate nohighlight">\(\vec{O_{1}}\)</span>, when any of <span class="math notranslate nohighlight">\(\vec{K_{1}}\)</span>, <span class="math notranslate nohighlight">\(\vec{K_{2}}\)</span>, or <span class="math notranslate nohighlight">\(\vec{K_{3}}\)</span> has a large dot product with <span class="math notranslate nohighlight">\(\vec{Q_{1}}\)</span>.</p>
+<p>We get large values for elements in <span class="math notranslate nohighlight">\(\vec{O_{2}}\)</span>, when any of <span class="math notranslate nohighlight">\(\vec{K_{1}}\)</span>, <span class="math notranslate nohighlight">\(\vec{K_{2}}\)</span>, or <span class="math notranslate nohighlight">\(\vec{K_{3}}\)</span> has a large dot product with <span class="math notranslate nohighlight">\(\vec{Q_{2}}\)</span>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -551,6 +529,16 @@ tensor([[0.1390, 0.1644],
 </pre></div>
 </div>
 </div>
+<p><span class="math notranslate nohighlight">\(\vec{Q_{i}}\)</span> contains information about whate each token is looking for. <span class="math notranslate nohighlight">\(\vec{K_{j}}\)</span> is about what information each token has. We calculate dot products between <span class="math notranslate nohighlight">\(\vec{Q_{i}}\)</span> and <span class="math notranslate nohighlight">\(\vec{K_{j}}\)</span> to figure out how closely related they are, and use them as weights to muliply our feature vectors, <span class="math notranslate nohighlight">\(\vec{V_{j}}\)</span> to get updated feature vectors <span class="math notranslate nohighlight">\(\vec{O_{j}}\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
 </section>
 
 
